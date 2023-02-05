@@ -1,5 +1,7 @@
 set(SOURCES
 	ParaviewWriter.hpp
+	VTMWriter.cpp
+	VTMWriter.hpp
 	HDF5VTUWriter.cpp
 	HDF5VTUWriter.hpp
 	VTUWriter.cpp
