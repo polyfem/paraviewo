@@ -21,7 +21,9 @@ namespace paraviewo
 
 	void VTMWriter::add_dataset(const std::string &block_name, const std::string &name, const std::string &file_name)
 	{
-		tinyxml2::XMLElement *block = multiblock_->InsertNewChildElement("Block");
+		tinyxml2::XMLElement *root = vtm_.FirstChildElement("VTKFile");
+		tinyxml2::XMLElement *multiblock = root->FirstChildElement("vtkMultiBlockDataSet");
+		tinyxml2::XMLElement *block = multiblock->InsertNewChildElement("Block");
 		block->SetAttribute("name", block_name.c_str());
 		tinyxml2::XMLElement *dataset = block->InsertNewChildElement("DataSet");
 		dataset->SetAttribute("name", name.c_str());

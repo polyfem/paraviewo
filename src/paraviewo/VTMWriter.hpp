@@ -15,6 +15,5 @@ namespace paraviewo
 
 	private:
 		tinyxml2::XMLDocument vtm_;
-		tinyxml2::XMLElement *multiblock_;
 	};
 } // namespace paraviewo
