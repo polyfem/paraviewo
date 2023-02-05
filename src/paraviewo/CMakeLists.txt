@@ -6,6 +6,8 @@ set(SOURCES
 	HDF5VTUWriter.hpp
 	VTUWriter.cpp
 	VTUWriter.hpp
+	PVDWriter.cpp
+	PVDWriter.hpp
 	base64Layer.hpp
 	base64Layer.cpp
 )

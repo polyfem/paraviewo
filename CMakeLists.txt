@@ -89,6 +89,10 @@ target_link_libraries(paraviewo PUBLIC Eigen3::Eigen)
 include(tinyxml)
 target_link_libraries(paraviewo PUBLIC tinyxml2)
 
+# fmt library
+include(fmt)
+target_link_libraries(paraviewo PUBLIC fmt::fmt)
+
 # HighFive + HDF5 library
 include(hdf5)
 target_link_libraries(paraviewo PUBLIC hdf5::hdf5)
