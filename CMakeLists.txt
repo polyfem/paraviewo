@@ -86,8 +86,8 @@ include(eigen)
 target_link_libraries(paraviewo PUBLIC Eigen3::Eigen)
 
 # TinyXML library
-# include(tinyxml)
-# target_link_libraries(paraviewo PUBLIC tinyxml2)
+include(tinyxml)
+target_link_libraries(paraviewo PUBLIC tinyxml2)
 
 # HighFive + HDF5 library
 include(hdf5)
