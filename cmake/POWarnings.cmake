@@ -3,7 +3,7 @@
 # http://stackoverflow.com/questions/5088460/flags-to-enable-thorough-and-verbose-g-warnings
 ################################################################################
 
-if(TARGET warnings::warnings)
+if(TARGET paraviewo::warnings)
     return()
 endif()
 
@@ -158,8 +158,8 @@ endif()
 
 include(CheckCXXCompilerFlag)
 
-add_library(warnings_warnings INTERFACE)
-add_library(warnings::warnings ALIAS warnings_warnings)
+add_library(paraviewo_warnings INTERFACE)
+add_library(paraviewo::warnings ALIAS paraviewo_warnings)
 
 foreach(FLAG IN ITEMS ${WARNING_WARNING_FLAGS})
     string(REPLACE "=" "-" FLAG_VAR "${FLAG}")
@@ -167,6 +167,6 @@ foreach(FLAG IN ITEMS ${WARNING_WARNING_FLAGS})
         check_cxx_compiler_flag("${FLAG}" IS_SUPPORTED_${FLAG_VAR})
     endif()
     if(IS_SUPPORTED_${FLAG_VAR})
-        target_compile_options(warnings_warnings INTERFACE ${FLAG})
+        target_compile_options(paraviewo_warnings INTERFACE ${FLAG})
     endif()
 endforeach()

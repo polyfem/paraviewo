@@ -42,7 +42,7 @@ include(UseColors)
 include(PrependCurrentPath)
 
 # Extra warnings
-include(Warnings)
+include(POWarnings)
 
 # Use C++11/14
 include(CXXFeatures)
@@ -97,7 +97,7 @@ include(high_five)
 target_link_libraries(paraviewo PUBLIC HighFive::HighFive)
 
 # Extra warnings (link this here so it has top priority)
-target_link_libraries(paraviewo PRIVATE warnings::warnings)
+target_link_libraries(paraviewo PRIVATE paraviewo::warnings)
 
 # Documentation
 if(PARAVIEWO_TOPLEVEL_PROJECT)
