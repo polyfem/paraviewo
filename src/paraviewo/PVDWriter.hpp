@@ -3,7 +3,7 @@
 #include <string>
 #include <functional>
 
-namespace praviewo
+namespace paraviewo
 {
 	class PVDWriter
 	{
@@ -13,4 +13,4 @@ namespace praviewo
 			const std::function<std::string(int)> &vtu_names,
 			int time_steps, double t0, double dt, int skip_frame);
 	};
-} // namespace praviewo
+} // namespace paraviewo

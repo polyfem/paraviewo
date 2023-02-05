@@ -3,7 +3,7 @@
 #include <tinyxml2.h>
 #include <fmt/core.h>
 
-namespace praviewo
+namespace paraviewo
 {
 	void PVDWriter::save_pvd(
 		const std::string &name,
@@ -35,4 +35,4 @@ namespace praviewo
 
 		pvd.SaveFile(name.c_str());
 	}
-} // namespace praviewo
+} // namespace paraviewo
