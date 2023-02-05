@@ -38,8 +38,8 @@ namespace paraviewo
 		auto attr = grp.createAttribute("Type", HighFive::DataSpace{1}, tmp);
 		attr.write("UnstructuredGrid");
 
-		grp.createDataSet("NumberOfPoints", std::array<uint32_t, 1>{{n_vertices}});
-		grp.createDataSet("NumberOfCells", std::array<uint32_t, 1>{{n_elements}});
+		grp.createDataSet("NumberOfPoints", std::array<int64_t, 1>{{n_vertices}});
+		grp.createDataSet("NumberOfCells", std::array<int64_t, 1>{{n_elements}});
 	}
 
 	void HDF5VTUWriter::write_points(const Eigen::MatrixXd &points, HighFive::File &file)
@@ -66,7 +66,7 @@ namespace paraviewo
 		const int n_cell_vertices = cells.cols();
 		int index;
 
-		grp.createDataSet("NumberOfConnectivityIds", std::array<uint32_t, 1>{{n_cells * n_cell_vertices}});
+		grp.createDataSet("NumberOfConnectivityIds", std::array<int64_t, 1>{{n_cells * n_cell_vertices}});
 		Eigen::Matrix<int64_t, Eigen::Dynamic, 1> connectivity_array(n_cells * n_cell_vertices);
 		index = 0;
 
@@ -119,7 +119,7 @@ namespace paraviewo
 		{
 			n_cells_indices += c.size();
 		}
-		grp.createDataSet("NumberOfConnectivityIds", std::array<uint32_t, 1>{{n_cells_indices}});
+		grp.createDataSet("NumberOfConnectivityIds", std::array<int64_t, 1>{{n_cells_indices}});
 
 		Eigen::Matrix<int64_t, Eigen::Dynamic, 1> connectivity_array(n_cells_indices);
 		index = 0;
