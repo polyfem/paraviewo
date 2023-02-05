@@ -81,7 +81,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest]
-        arc: [x86, arm64]
+        arc: [x86]
         config: [Debug, Release]
         include:
           - os: macos-latest
@@ -162,7 +162,6 @@ jobs:
       - name: Set env
         run: |
           echo "appdata=$env:LOCALAPPDATA" >> ${env:GITHUB_ENV}
-          conda init powershell
 
 
       - name: Cache build
