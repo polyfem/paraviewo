@@ -31,6 +31,8 @@ project(ParaviewO DESCRIPTION "A simple C++ library to write Paraview Files" LAN
 ################################################################################
 
 option(PARAVIEWO_BUILD_DOCS       "Build documentation using Doxygen" OFF)
+option(PARAVIEWO_WITH_TESTS       "Enables unit test" ON)
+
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/recipes/")
@@ -125,11 +127,11 @@ endif()
 add_subdirectory(src/paraviewo)
 
 # Compile extras only if this is a top-level project
-# if(PARAVIEWO_TOPLEVEL_PROJECT)
-#     # Unit tests
-#     if(PARAVIEWO_WITH_TESTS)
-#         include(CTest)
-#         enable_testing()
-#         add_subdirectory(tests)
-#     endif()
-# endif()
+if(PARAVIEWO_TOPLEVEL_PROJECT)
+    # Unit tests
+    if(PARAVIEWO_WITH_TESTS)
+        include(CTest)
+        enable_testing()
+        add_subdirectory(tests)
+    endif()
+endif()

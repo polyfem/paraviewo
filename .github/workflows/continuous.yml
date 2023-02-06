@@ -63,8 +63,8 @@ jobs:
       - name: Build
         run: cd build; make -j2; ccache --show-stats
 
-      # - name: Tests
-      #   run: cd build; OMP_NUM_THREADS=1 ctest --verbose --output-on-failure
+      - name: Tests
+        run: cd build; ctest --verbose --output-on-failure
 
       # - name: Setup tmate session
       #   if: ${{ failure() }}
@@ -133,9 +133,9 @@ jobs:
       - name: Build
         run: cd build; make -j2; ccache --show-stats
 
-      # - name: Tests
-      #   if: matrix.arc == 'x86' # no ARM vm on actions yet
-      #   run: cd build; ctest --verbose --output-on-failure
+      - name: Tests
+        if: matrix.arc == 'x86' # no ARM vm on actions yet
+        run: cd build; ctest --verbose --output-on-failure
 
   ####################
   # Windows
@@ -192,7 +192,7 @@ jobs:
             -S .
           cmake --build build -j1
 
-      # - name: Tests
-      #   run: |
-      #     cd build
-      #     ctest --verbose --output-on-failure
+      - name: Tests
+        run: |
+          cd build
+          ctest --verbose --output-on-failure
