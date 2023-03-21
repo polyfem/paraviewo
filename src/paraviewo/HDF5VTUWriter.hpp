@@ -66,11 +66,11 @@ namespace paraviewo
 		bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells) override;
 		bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<std::vector<int>> &cells, const bool is_simplicial, const bool has_poly) override;
 
-		void add_field(const std::string &name, const Eigen::MatrixXd &data) override;
+		void clear() override;
+
+	protected:
 		void add_scalar_field(const std::string &name, const Eigen::MatrixXd &data) override;
 		void add_vector_field(const std::string &name, const Eigen::MatrixXd &data) override;
-
-		void clear() override;
 
 	private:
 		bool is_volume_;
