@@ -7,6 +7,7 @@ namespace paraviewo
 		: binary_(binary)
 	{
 	}
+
 	void VTUWriter::write_point_data(std::ostream &os)
 	{
 		if (current_scalar_point_data_.empty() && current_vector_point_data_.empty())
@@ -25,6 +26,26 @@ namespace paraviewo
 		}
 
 		os << "</PointData>\n";
+	}
+
+	void VTUWriter::write_cell_data(std::ostream &os)
+	{
+		if (current_scalar_cell_data_.empty() && current_vector_cell_data_.empty())
+			return;
+
+		os << "<CellData ";
+		if (!current_scalar_cell_data_.empty())
+			os << "Scalars=\"" << current_scalar_cell_data_ << "\" ";
+		if (!current_vector_cell_data_.empty())
+			os << "Vectors=\"" << current_vector_cell_data_ << "\" ";
+		os << ">\n";
+
+		for (auto it = cell_data_.begin(); it != cell_data_.end(); ++it)
+		{
+			it->write(os);
+		}
+
+		os << "</CellData>\n";
 	}
 
 	void VTUWriter::write_header(const int n_vertices, const int n_elements, std::ostream &os)
@@ -325,6 +346,29 @@ namespace paraviewo
 		current_vector_point_data_ = name;
 	}
 
+	void VTUWriter::add_scalar_cell_field(const std::string &name, const Eigen::MatrixXd &data)
+	{
+		cell_data_.push_back(VTKDataNode<double>(binary_));
+		cell_data_.back().initialize(name, "Float64", data);
+		current_scalar_cell_data_ = name;
+	}
+
+	void VTUWriter::add_vector_cell_field(const std::string &name, const Eigen::MatrixXd &data)
+	{
+		cell_data_.push_back(VTKDataNode<double>(binary_));
+
+		Eigen::MatrixXd tmp = data;
+
+		if (data.cols() == 2)
+		{
+			tmp.conservativeResize(tmp.rows(), 3);
+			tmp.col(2).setZero();
+		}
+
+		cell_data_.back().initialize(name, "Float64", tmp, tmp.cols());
+		current_vector_cell_data_ = name;
+	}
+
 	bool VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells)
 	{
 		std::ofstream os;
@@ -340,6 +384,7 @@ namespace paraviewo
 		write_header(points.rows(), cells.rows(), os);
 		write_points(points, os);
 		write_point_data(os);
+		write_cell_data(os);
 		write_cells(cells, os);
 
 		write_footer(os);
@@ -363,6 +408,7 @@ namespace paraviewo
 		write_header(points.rows(), cells.size(), os);
 		write_points(points, os);
 		write_point_data(os);
+		write_cell_data(os);
 		write_cells(cells, is_simplicial, has_poly, os);
 
 		write_footer(os);
