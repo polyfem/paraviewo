@@ -38,8 +38,8 @@ jobs:
           xorg-dev \
           ccache
           echo 'CACHE_PATH=~/.ccache' >> "$GITHUB_ENV"
-          echo 'CCACHE_DIR=${{ env.CACHE_PATH }}' >> "$GITHUB_ENV"
-          echo 'CCACHE_TEMPDIR=${{ env.CACHE_PATH }}' >> "$GITHUB_ENV"
+          echo 'CCACHE_DIR=~/.ccache' >> "$GITHUB_ENV"
+          echo 'CCACHE_TEMPDIR=~/.ccache' >> "$GITHUB_ENV"
 
       - name: Cache Build
         id: cache-build
