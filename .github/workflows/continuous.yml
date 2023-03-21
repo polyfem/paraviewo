@@ -142,7 +142,7 @@ jobs:
   ####################
 
   Windows:
-    name: ${{ matrix.name }} (${{ matrix.config }})
+    name: Windows (${{ matrix.config }})
     runs-on: windows-2022
     env:
       SCCACHE_IDLE_TIMEOUT: "12000"
