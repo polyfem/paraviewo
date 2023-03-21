@@ -20,14 +20,22 @@ namespace paraviewo
 	{
 	}
 
-	void HDF5VTUWriter::write_point_data(HighFive::File &file)
+	void HDF5VTUWriter::write_data(HighFive::File &file)
 	{
-		if (current_scalar_point_data_.empty() && current_vector_point_data_.empty())
-			return;
-
-		for (auto it = point_data_.begin(); it != point_data_.end(); ++it)
+		if (!current_scalar_point_data_.empty() || !current_vector_point_data_.empty())
 		{
-			it->write(file);
+			for (auto it = point_data_.begin(); it != point_data_.end(); ++it)
+			{
+				it->write(file);
+			}
+		}
+
+		if (!current_scalar_cell_data_.empty() || !current_vector_cell_data_.empty())
+		{
+			for (auto it = cell_data_.begin(); it != cell_data_.end(); ++it)
+			{
+				it->write(file);
+			}
 		}
 	}
 
@@ -174,32 +182,16 @@ namespace paraviewo
 		cell_data_.clear();
 	}
 
-	void HDF5VTUWriter::add_field(const std::string &name, const Eigen::MatrixXd &data)
-	{
-		using std::abs;
-
-		Eigen::MatrixXd tmp;
-		tmp.resizeLike(data);
-
-		for (long i = 0; i < data.size(); ++i)
-			tmp(i) = abs(data(i)) < 1e-16 ? 0 : data(i);
-
-		if (tmp.cols() == 1)
-			add_scalar_field(name, tmp);
-		else
-			add_vector_field(name, tmp);
-	}
-
 	void HDF5VTUWriter::add_scalar_field(const std::string &name, const Eigen::MatrixXd &data)
 	{
-		point_data_.push_back(HDF5VTKDataNode<double>());
+		point_data_.push_back(HDF5VTKDataNode<double>(true));
 		point_data_.back().initialize(name, data);
 		current_scalar_point_data_ = name;
 	}
 
 	void HDF5VTUWriter::add_vector_field(const std::string &name, const Eigen::MatrixXd &data)
 	{
-		point_data_.push_back(HDF5VTKDataNode<double>());
+		point_data_.push_back(HDF5VTKDataNode<double>(true));
 
 		Eigen::MatrixXd tmp = data;
 
@@ -213,6 +205,29 @@ namespace paraviewo
 		current_vector_point_data_ = name;
 	}
 
+	void HDF5VTUWriter::add_scalar_cell_field(const std::string &name, const Eigen::MatrixXd &data)
+	{
+		cell_data_.push_back(HDF5VTKDataNode<double>(false));
+		cell_data_.back().initialize(name, data);
+		current_scalar_cell_data_ = name;
+	}
+
+	void HDF5VTUWriter::add_vector_cell_field(const std::string &name, const Eigen::MatrixXd &data)
+	{
+		cell_data_.push_back(HDF5VTKDataNode<double>(false));
+
+		Eigen::MatrixXd tmp = data;
+
+		if (data.cols() == 2)
+		{
+			tmp.conservativeResize(tmp.rows(), 3);
+			tmp.col(2).setZero();
+		}
+
+		cell_data_.back().initialize(name, tmp);
+		current_vector_cell_data_ = name;
+	}
+
 	bool HDF5VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells)
 	{
 		is_volume_ = points.cols() == 3;
@@ -222,7 +237,7 @@ namespace paraviewo
 
 		write_header(points.rows(), cells.rows(), grp, file);
 		write_points(points, file);
-		write_point_data(file);
+		write_data(file);
 		write_cells(cells, grp, file);
 
 		file.flush();
@@ -239,7 +254,7 @@ namespace paraviewo
 
 		write_header(points.rows(), cells.size(), grp, file);
 		write_points(points, file);
-		write_point_data(file);
+		write_data(file);
 		write_cells(cells, is_simplicial, has_poly, grp, file);
 
 		file.flush();

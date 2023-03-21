@@ -81,22 +81,29 @@ namespace paraviewo
 		bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells) override;
 		bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<std::vector<int>> &cells, const bool is_simplicial, const bool has_poly) override;
 
-		void add_field(const std::string &name, const Eigen::MatrixXd &data) override;
+		void clear() override;
+
+	protected:
 		void add_scalar_field(const std::string &name, const Eigen::MatrixXd &data) override;
 		void add_vector_field(const std::string &name, const Eigen::MatrixXd &data) override;
 
-		void clear() override;
+		void add_scalar_cell_field(const std::string &name, const Eigen::MatrixXd &data) override;
+		void add_vector_cell_field(const std::string &name, const Eigen::MatrixXd &data) override;
 
 	private:
 		bool is_volume_;
 		bool binary_;
 
 		std::vector<VTKDataNode<double>> point_data_;
-		std::vector<VTKDataNode<double>> cell_data_;
 		std::string current_scalar_point_data_;
 		std::string current_vector_point_data_;
 
+		std::vector<VTKDataNode<double>> cell_data_;
+		std::string current_scalar_cell_data_;
+		std::string current_vector_cell_data_;
+
 		void write_point_data(std::ostream &os);
+		void write_cell_data(std::ostream &os);
 		void write_header(const int n_vertices, const int n_elements, std::ostream &os);
 		void write_footer(std::ostream &os);
 		void write_points(const Eigen::MatrixXd &points, std::ostream &os);

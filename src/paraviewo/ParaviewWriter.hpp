@@ -81,10 +81,45 @@ namespace paraviewo
 		virtual bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells) = 0;
 		virtual bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<std::vector<int>> &cells, const bool is_simplicial, const bool has_poly) = 0;
 
-		virtual void add_field(const std::string &name, const Eigen::MatrixXd &data) = 0;
+		void add_field(const std::string &name, const Eigen::MatrixXd &data)
+		{
+			using std::abs;
+
+			Eigen::MatrixXd tmp;
+			tmp.resizeLike(data);
+
+			for (long i = 0; i < data.size(); ++i)
+				tmp(i) = abs(data(i)) < 1e-16 ? 0 : data(i);
+
+			if (tmp.cols() == 1)
+				add_scalar_field(name, tmp);
+			else
+				add_vector_field(name, tmp);
+		}
+
+		void add_cell_field(const std::string &name, const Eigen::MatrixXd &data)
+		{
+			using std::abs;
+
+			Eigen::MatrixXd tmp;
+			tmp.resizeLike(data);
+
+			for (long i = 0; i < data.size(); ++i)
+				tmp(i) = abs(data(i)) < 1e-16 ? 0 : data(i);
+
+			if (tmp.cols() == 1)
+				add_scalar_cell_field(name, tmp);
+			else
+				add_vector_cell_field(name, tmp);
+		}
+
+		virtual void clear() = 0;
+
+	protected:
 		virtual void add_scalar_field(const std::string &name, const Eigen::MatrixXd &data) = 0;
 		virtual void add_vector_field(const std::string &name, const Eigen::MatrixXd &data) = 0;
 
-		virtual void clear() = 0;
+		virtual void add_scalar_cell_field(const std::string &name, const Eigen::MatrixXd &data) = 0;
+		virtual void add_vector_cell_field(const std::string &name, const Eigen::MatrixXd &data) = 0;
 	};
 } // namespace paraviewo
