@@ -51,6 +51,7 @@ jobs:
         run: |
           ccache --max-size=1.0G
           ccache -V && ccache --show-stats && ccache --zero-stats
+          ccache -s
 
       - name: Configure
         run: |
