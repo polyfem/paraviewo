@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <paraviewo/VTUWriter.hpp>
 #include <paraviewo/HDF5VTUWriter.hpp>
+#include <paraviewo/PVDWriter.hpp>
 
 #include <Eigen/Dense>
 
@@ -36,6 +37,23 @@ void run_test(ParaviewWriter &writer, const std::string &name)
 	writer.write_mesh(name, pts, tris);
 }
 
+template <typename T>
+void save_sequence(const std::string &extension)
+{
+	auto name_func = [&extension](int i) {
+		return "test_" + std::to_string(i) + "." + extension;
+	};
+
+	for (int i = 0; i < 10; ++i)
+	{
+		T writer;
+		std::string name = name_func(i);
+		run_test(writer, name);
+	}
+
+	PVDWriter::save_pvd("sim_" + extension + ".pvd", name_func, 9, 0, 0.1, 1);
+}
+
 TEST_CASE("vtu_writer", "[utils]")
 {
 	VTUWriter writer;
@@ -46,4 +64,14 @@ TEST_CASE("hdf5_writer", "[utils]")
 {
 	HDF5VTUWriter writer;
 	run_test(writer, "test.hdf");
+}
+
+TEST_CASE("vtu_sequence", "[utils]")
+{
+	save_sequence<VTUWriter>("vtu");
+}
+
+TEST_CASE("hdf5_sequence", "[utils]")
+{
+	save_sequence<HDF5VTUWriter>("hdf");
 }
