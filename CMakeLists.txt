@@ -7,7 +7,7 @@ else()
 endif()
 
 # Check required CMake version
-set(REQUIRED_CMAKE_VERSION "3.14.0")
+set(REQUIRED_CMAKE_VERSION "3.24.0")
 if(PARAVIEWO_TOPLEVEL_PROJECT)
     cmake_minimum_required(VERSION ${REQUIRED_CMAKE_VERSION})
 else()
@@ -67,7 +67,7 @@ include(sanitizers)
 
 add_library(paraviewo)
 add_library(paraviewo::paraviewo ALIAS paraviewo)
-
+set_property(TARGET paraviewo PROPERTY COMPILE_WARNING_AS_ERROR ON)
 
 # Public include directory for paraviewo
 target_include_directories(paraviewo PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
