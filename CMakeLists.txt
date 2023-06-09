@@ -49,6 +49,9 @@ include(POWarnings)
 # Use C++11/14
 include(CXXFeatures)
 
+# Utility function to link libraries as system libraries to avoid warnings
+include(ParaviewoTargetLinkSystemLibraries)
+
 # Sort projects inside the solution
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -67,7 +70,7 @@ include(sanitizers)
 
 add_library(paraviewo)
 add_library(paraviewo::paraviewo ALIAS paraviewo)
-set_property(TARGET paraviewo PROPERTY COMPILE_WARNING_AS_ERROR ON)
+# set_property(TARGET paraviewo PROPERTY COMPILE_WARNING_AS_ERROR ON)
 
 # Public include directory for paraviewo
 target_include_directories(paraviewo PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -85,22 +88,22 @@ endif ()
 
 # Eigen
 include(eigen)
-target_link_libraries(paraviewo PUBLIC Eigen3::Eigen)
+paraviewo_target_link_system_libraries(paraviewo PUBLIC Eigen3::Eigen)
 
 # TinyXML library
 include(tinyxml)
-target_link_libraries(paraviewo PUBLIC tinyxml2)
+paraviewo_target_link_system_libraries(paraviewo PUBLIC tinyxml2)
 
 # fmt library
 include(fmt)
-target_link_libraries(paraviewo PUBLIC fmt::fmt)
+paraviewo_target_link_system_libraries(paraviewo PUBLIC fmt::fmt)
 
 # HighFive + HDF5 library
 include(hdf5)
-target_link_libraries(paraviewo PUBLIC hdf5::hdf5)
+paraviewo_target_link_system_libraries(paraviewo PUBLIC hdf5::hdf5)
 
 include(high_five)
-target_link_libraries(paraviewo PUBLIC HighFive::HighFive)
+paraviewo_target_link_system_libraries(paraviewo PUBLIC HighFive::HighFive)
 
 # Extra warnings (link this here so it has top priority)
 target_link_libraries(paraviewo PRIVATE paraviewo::warnings)
