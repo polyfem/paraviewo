@@ -98,12 +98,12 @@ paraviewo_target_link_system_libraries(paraviewo PUBLIC tinyxml2)
 include(fmt)
 paraviewo_target_link_system_libraries(paraviewo PUBLIC fmt::fmt)
 
-# HighFive + HDF5 library
+# h5pp + HDF5 library
 include(hdf5)
 paraviewo_target_link_system_libraries(paraviewo PUBLIC hdf5::hdf5)
 
-include(high_five)
-paraviewo_target_link_system_libraries(paraviewo PUBLIC HighFive::HighFive)
+include(h5pp)
+paraviewo_target_link_system_libraries(paraviewo PUBLIC h5pp::h5pp)
 
 # Extra warnings (link this here so it has top priority)
 target_link_libraries(paraviewo PRIVATE paraviewo::warnings)

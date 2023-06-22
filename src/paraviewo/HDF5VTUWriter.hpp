@@ -2,8 +2,7 @@
 
 #include "ParaviewWriter.hpp"
 
-#include <highfive/H5Easy.hpp>
-#include <highfive/H5File.hpp>
+#include <h5pp/h5pp.h>
 
 #include <Eigen/Dense>
 
@@ -39,17 +38,17 @@ namespace paraviewo
 			data_ = data;
 		}
 
-		void write(HighFive::File &file) const
+		void write(h5pp::File &file) const
 		{
 			const std::string key = is_point_ ? "PointData" : "CellData";
 
 			assert(data_.cols() == 1 || data_.cols() == 3);
 			if (data_.cols() == 3)
-				H5Easy::dump(file, "/VTKHDF/" + key + "/" + name_, data_);
+				file.writeDataset(data_, "/VTKHDF/" + key + "/" + name_, H5D_CONTIGUOUS);
 			else
 			{
 				Eigen::Matrix<T, Eigen::Dynamic, 1> tmp = data_.col(0);
-				H5Easy::dump(file, "/VTKHDF/" + key + "/" + name_, tmp);
+				file.writeDataset(tmp, "/VTKHDF/" + key + "/" + name_, H5D_CONTIGUOUS);
 			}
 		}
 
@@ -90,11 +89,11 @@ namespace paraviewo
 		std::string current_scalar_cell_data_;
 		std::string current_vector_cell_data_;
 
-		void write_data(HighFive::File &file);
-		void write_header(const int n_vertices, const int n_elements, HighFive::Group &grp, HighFive::File &file);
-		void write_points(const Eigen::MatrixXd &points, HighFive::File &file);
-		void write_cells(const Eigen::MatrixXi &cells, HighFive::Group &grp, HighFive::File &file);
-		void write_cells(const std::vector<std::vector<int>> &cells, const bool is_simplex, const bool is_poly, HighFive::Group &grp, HighFive::File &file);
+		void write_data(h5pp::File &file);
+		void write_header(const int n_vertices, const int n_elements, const std::string &grp, h5pp::File &file);
+		void write_points(const Eigen::MatrixXd &points, h5pp::File &file);
+		void write_cells(const Eigen::MatrixXi &cells, const std::string &grp, h5pp::File &file);
+		void write_cells(const std::vector<std::vector<int>> &cells, const bool is_simplex, const bool is_poly, const std::string &grp, h5pp::File &file);
 	};
 
 } // namespace paraviewo
