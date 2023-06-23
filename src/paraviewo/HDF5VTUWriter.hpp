@@ -44,11 +44,11 @@ namespace paraviewo
 
 			assert(data_.cols() == 1 || data_.cols() == 3);
 			if (data_.cols() == 3)
-				file.writeDataset(data_, "/VTKHDF/" + key + "/" + name_, H5D_CONTIGUOUS);
+				file.writeDataset(data_, "/VTKHDF/" + key + "/" + name_);
 			else
 			{
 				Eigen::Matrix<T, Eigen::Dynamic, 1> tmp = data_.col(0);
-				file.writeDataset(tmp, "/VTKHDF/" + key + "/" + name_, H5D_CONTIGUOUS);
+				file.writeDataset(tmp, "/VTKHDF/" + key + "/" + name_);
 			}
 		}
 

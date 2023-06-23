@@ -32,8 +32,8 @@ namespace paraviewo
 		file.writeAttribute(std::array<int64_t, 2>{{1, 0}}, grp, "Version");
 		file.writeAttribute(tmp, grp, "Type", 16);
 
-		file.writeDataset(std::array<int64_t, 1>{{n_vertices}}, grp + "/NumberOfPoints", H5D_CONTIGUOUS);
-		file.writeDataset(std::array<int64_t, 1>{{n_elements}}, grp + "/NumberOfCells", H5D_CONTIGUOUS);
+		file.writeDataset(std::array<int64_t, 1>{{n_vertices}}, grp + "/NumberOfPoints");
+		file.writeDataset(std::array<int64_t, 1>{{n_elements}}, grp + "/NumberOfCells");
 	}
 
 	void HDF5VTUWriter::write_points(const Eigen::MatrixXd &points, h5pp::File &file)
@@ -51,7 +51,7 @@ namespace paraviewo
 				tmp(d, 2) = 0;
 		}
 
-		file.writeDataset(tmp, "/VTKHDF/Points", H5D_CONTIGUOUS);
+		file.writeDataset(tmp, "/VTKHDF/Points");
 	}
 
 	void HDF5VTUWriter::write_cells(const Eigen::MatrixXi &cells, const std::string &grp, h5pp::File &file)
@@ -60,7 +60,7 @@ namespace paraviewo
 		const int n_cell_vertices = cells.cols();
 		int index;
 
-		file.writeDataset(std::array<int64_t, 1>{{n_cells * n_cell_vertices}}, grp + "/NumberOfConnectivityIds", H5D_CONTIGUOUS);
+		file.writeDataset(std::array<int64_t, 1>{{n_cells * n_cell_vertices}}, grp + "/NumberOfConnectivityIds");
 		Eigen::Matrix<int64_t, Eigen::Dynamic, 1> connectivity_array(n_cells * n_cell_vertices);
 		index = 0;
 
@@ -76,14 +76,14 @@ namespace paraviewo
 		assert(index == n_cells * n_cell_vertices);
 		assert(connectivity_array.size() == n_cells * n_cell_vertices);
 
-		file.writeDataset(connectivity_array, "/VTKHDF/Connectivity", H5D_CONTIGUOUS);
+		file.writeDataset(connectivity_array, "/VTKHDF/Connectivity");
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		const uint8_t int_tag = is_volume_ ? paraview_tags::VTKTagVolume(n_cell_vertices, true, false) : paraview_tags::VTKTagPlanar(n_cell_vertices, true, false);
 		Eigen::Matrix<uint8_t, Eigen::Dynamic, 1> type_array(n_cells);
 		type_array.setConstant(int_tag);
-		file.writeDataset(type_array, "/VTKHDF/Types", H5D_CONTIGUOUS);
+		file.writeDataset(type_array, "/VTKHDF/Types");
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		Eigen::Matrix<int64_t, Eigen::Dynamic, 1> offset_array(n_cells + 1);
@@ -100,7 +100,7 @@ namespace paraviewo
 		assert(index == n_cells + 1);
 		assert(offset_array.size() == n_cells + 1);
 
-		file.writeDataset(offset_array, "/VTKHDF/Offsets", H5D_CONTIGUOUS);
+		file.writeDataset(offset_array, "/VTKHDF/Offsets");
 	}
 
 	void HDF5VTUWriter::write_cells(const std::vector<std::vector<int>> &cells, const bool is_simplex, const bool is_poly, const std::string &grp, h5pp::File &file)
@@ -113,7 +113,7 @@ namespace paraviewo
 		{
 			n_cells_indices += c.size();
 		}
-		file.writeDataset(std::array<int64_t, 1>{{n_cells_indices}}, grp + "/NumberOfConnectivityIds", H5D_CONTIGUOUS);
+		file.writeDataset(std::array<int64_t, 1>{{n_cells_indices}}, grp + "/NumberOfConnectivityIds");
 
 		Eigen::Matrix<int64_t, Eigen::Dynamic, 1> connectivity_array(n_cells_indices);
 		index = 0;
@@ -126,7 +126,7 @@ namespace paraviewo
 		assert(index == n_cells_indices);
 		assert(connectivity_array.size() == n_cells_indices);
 
-		file.writeDataset(connectivity_array, "/VTKHDF/Connectivity", H5D_CONTIGUOUS);
+		file.writeDataset(connectivity_array, "/VTKHDF/Connectivity");
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		Eigen::Matrix<uint8_t, Eigen::Dynamic, 1> type_array(n_cells);
@@ -142,7 +142,7 @@ namespace paraviewo
 		assert(index == n_cells);
 		assert(type_array.size() == n_cells);
 
-		file.writeDataset(type_array, "/VTKHDF/Types", H5D_CONTIGUOUS);
+		file.writeDataset(type_array, "/VTKHDF/Types");
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		Eigen::Matrix<int64_t, Eigen::Dynamic, 1> offset_array(n_cells + 1);
@@ -159,7 +159,7 @@ namespace paraviewo
 		assert(index == n_cells + 1);
 		assert(offset_array.size() == n_cells + 1);
 
-		file.writeDataset(offset_array, "/VTKHDF/Offsets", H5D_CONTIGUOUS);
+		file.writeDataset(offset_array, "/VTKHDF/Offsets");
 	}
 
 	void HDF5VTUWriter::clear()
@@ -219,7 +219,7 @@ namespace paraviewo
 		is_volume_ = points.cols() == 3;
 
 		h5pp::File file(path, h5pp::FileAccess::REPLACE);
-		file.setCompressionLevel(0);
+		file.setCompressionLevel(5);
 		file.createGroup("VTKHDF");
 
 		write_header(points.rows(), cells.rows(), "VTKHDF", file);
@@ -237,7 +237,7 @@ namespace paraviewo
 		is_volume_ = points.cols() == 3;
 
 		h5pp::File file(path, h5pp::FileAccess::REPLACE);
-		file.setCompressionLevel(0);
+		file.setCompressionLevel(5);
 		file.createGroup("VTKHDF");
 
 		write_header(points.rows(), cells.size(), "VTKHDF", file);
