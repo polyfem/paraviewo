@@ -7,6 +7,7 @@ endif()
 
 message(STATUS "Third-party: creating target 'hdf5'")
 
+option(HDF5_GENERATE_HEADERS ON)
 option(HDF5_BUILD_EXAMPLES OFF)
 option(HDF5_BUILD_TOOLS OFF)
 option(HDF5_BUILD_UTILS OFF)
