@@ -15,7 +15,7 @@ include(FetchContent)
 FetchContent_Declare(
     h5pp
     GIT_REPOSITORY https://github.com/wildmeshing/h5pp.git
-    GIT_TAG dad4751
+    GIT_TAG 9872c2f239271c711d572035cc689ae485e12a4c
     GIT_SHALLOW FALSE
 )
 FetchContent_MakeAvailable(h5pp)
