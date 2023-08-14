@@ -7,7 +7,7 @@ else()
 endif()
 
 # Check required CMake version
-set(REQUIRED_CMAKE_VERSION "3.24.0")
+set(REQUIRED_CMAKE_VERSION "3.14.0")
 if(PARAVIEWO_TOPLEVEL_PROJECT)
     cmake_minimum_required(VERSION ${REQUIRED_CMAKE_VERSION})
 else()
