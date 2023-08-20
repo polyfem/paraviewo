@@ -1,4 +1,4 @@
-# hdf5
+# hdf5 (https://github.com/HDFGroup/hdf5)
 # License: ???
 
 if(TARGET hdf5::hdf5)
@@ -25,14 +25,8 @@ option(HDF5_TEST_VFD "" OFF)
 #To prevent changes in the oput dirs
 set (HDF5_EXTERNALLY_CONFIGURED 1)
 
-include(FetchContent)
-FetchContent_Declare(
-    hdf5
-    GIT_REPOSITORY https://github.com/HDFGroup/hdf5
-    GIT_TAG ef24087b1712260d970ec78731cdfbdde8e141e9
-)
-FetchContent_MakeAvailable(hdf5)
-
+include(CPM)
+CPMAddPackage("gh:HDFGroup/hdf5#ef24087b1712260d970ec78731cdfbdde8e141e9")
 
 target_link_libraries(hdf5-static INTERFACE hdf5_hl-static)
 add_library(hdf5::hdf5 ALIAS hdf5-static)

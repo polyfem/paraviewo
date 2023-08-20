@@ -12,5 +12,5 @@ set(SOURCES
 	base64Layer.cpp
 )
 
-prepend_current_path(SOURCES)
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" PREFIX "Source Files" FILES ${SOURCES})
 target_sources(paraviewo PRIVATE ${SOURCES})
