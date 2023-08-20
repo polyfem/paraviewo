@@ -7,7 +7,7 @@ if(TARGET paraviewo::warnings)
     return()
 endif()
 
-set(WARNING_WARNING_FLAGS
+set(PARAVIEWO_WARNING_FLAGS
     -Wall
     -Wextra
     -pedantic
@@ -153,7 +153,7 @@ set(WARNING_WARNING_FLAGS
 
 # Flags above don't make sense for MSVC
 if(MSVC)
-    set(WARNING_WARNING_FLAGS)
+    set(PARAVIEWO_WARNING_FLAGS)
 endif()
 
 include(CheckCXXCompilerFlag)
@@ -161,12 +161,6 @@ include(CheckCXXCompilerFlag)
 add_library(paraviewo_warnings INTERFACE)
 add_library(paraviewo::warnings ALIAS paraviewo_warnings)
 
-foreach(FLAG IN ITEMS ${WARNING_WARNING_FLAGS})
-    string(REPLACE "=" "-" FLAG_VAR "${FLAG}")
-    if(NOT DEFINED IS_SUPPORTED_${FLAG_VAR})
-        check_cxx_compiler_flag("${FLAG}" IS_SUPPORTED_${FLAG_VAR})
-    endif()
-    if(IS_SUPPORTED_${FLAG_VAR})
-        target_compile_options(paraviewo_warnings INTERFACE ${FLAG})
-    endif()
-endforeach()
+include(paraviewo_filter_flags)
+paraviewo_filter_flags(PARAVIEWO_WARNING_FLAGS)
+target_compile_options(paraviewo_warnings INTERFACE ${PARAVIEWO_WARNING_FLAGS})
