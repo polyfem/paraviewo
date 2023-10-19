@@ -7,11 +7,12 @@ endif()
 
 message(STATUS "Third-party: creating target 'hdf5'")
 
-option(HDF5_GENERATE_HEADERS "" ON)
+option(HDF5_GENERATE_HEADERS "" OFF)
 option(HDF5_BUILD_EXAMPLES "" OFF)
 option(HDF5_BUILD_TOOLS "" OFF)
 option(HDF5_BUILD_UTILS "" OFF)
 option(HDF5_BUILD_HL_TOOLS "" OFF)
+option(HDF5_BUILD_HL_LIB "" ON)
 option(HDF5_TEST_CPP "" OFF)
 option(HDF5_TEST_EXAMPLES "" OFF)
 option(HDF5_TEST_FORTRAN "" OFF)
@@ -21,7 +22,8 @@ option(HDF5_TEST_SERIAL "" OFF)
 option(HDF5_TEST_SWMR "" OFF)
 option(HDF5_TEST_TOOLS "" OFF)
 option(HDF5_TEST_VFD "" OFF)
-
+option(HDF5_ENABLE_ALL_WARNINGS "" OFF)
+option(HDF5_ENABLE_EMBEDDED_LIBINFO "" OFF)
 #To prevent changes in the oput dirs
 set (HDF5_EXTERNALLY_CONFIGURED 1)
 
