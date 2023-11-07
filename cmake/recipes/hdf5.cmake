@@ -28,7 +28,10 @@ option(HDF5_ENABLE_EMBEDDED_LIBINFO "" OFF)
 set (HDF5_EXTERNALLY_CONFIGURED 1)
 
 include(CPM)
-CPMAddPackage("https://github.com/HDFGroup/hdf5/releases/download/hdf5-1_14_2/hdf5-1_14_2.zip")
+set(HDF5_RELEASE_TAG hdf5-1_14_3)
+
+#we fetch the zip file to get prebuilt files (and avoid a perl dependency)
+CPMAddPackage("https://github.com/HDFGroup/hdf5/releases/download/${HDF5_RELEASE_TAG}/${HDF5_RELEASE_TAG}.zip")
 
 target_link_libraries(hdf5-static INTERFACE hdf5_hl-static)
 add_library(hdf5::hdf5 ALIAS hdf5-static)
