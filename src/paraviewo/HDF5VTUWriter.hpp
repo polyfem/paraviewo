@@ -11,6 +11,8 @@
 #include <iostream>
 #include <vector>
 #include <array>
+#include <cassert>
+
 
 namespace paraviewo
 {
