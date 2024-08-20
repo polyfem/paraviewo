@@ -66,7 +66,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/recipes/")
 
 # Set default minimum C++ standard
 if(PARAVIEWO_TOPLEVEL_PROJECT)
-    set(CMAKE_CXX_STANDARD 20)
+    set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_CXX_EXTENSIONS OFF)
 endif()
@@ -122,10 +122,6 @@ target_link_libraries(paraviewo PUBLIC Eigen3::Eigen)
 # TinyXML library
 include(tinyxml)
 target_link_libraries(paraviewo PUBLIC tinyxml2)
-
-# fmt library
-include(fmt)
-target_link_libraries(paraviewo PUBLIC fmt::fmt)
 
 # h5pp + HDF5 library
 include(hdf5)
