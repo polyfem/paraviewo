@@ -8,8 +8,9 @@ endif()
 message(STATUS "Third-party: creating target 'h5pp'")
 
 SET(H5PP_ENABLE_EIGEN3 ON)
-SET(H5PP_ENABLE_FMT ON)
+SET(H5PP_ENABLE_FMT OFF)
+SET(H5PP_ENABLE_SPDLOG OFF)
 SET(H5PP_IS_SUBPROJECT ON)
 
 include(CPM)
-CPMAddPackage("gh:wildmeshing/h5pp#9872c2f239271c711d572035cc689ae485e12a4c")
+CPMAddPackage("gh:wildmeshing/h5pp#b46d66b16c11f4e94752433e61d92b152be3d1d8")
