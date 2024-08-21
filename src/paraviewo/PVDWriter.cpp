@@ -1,7 +1,6 @@
 #include "PVDWriter.hpp"
 
 #include <tinyxml2.h>
-#include <fmt/core.h>
 
 namespace paraviewo
 {
@@ -27,7 +26,7 @@ namespace paraviewo
 		for (int i = 0; i <= time_steps; i += skip_frame)
 		{
 			tinyxml2::XMLElement *dataset = collection->InsertNewChildElement("DataSet");
-			dataset->SetAttribute("timestep", fmt::format("{:g}", t0 + i * dt).c_str());
+			dataset->SetAttribute("timestep", std::to_string(t0 + i * dt).c_str());
 			dataset->SetAttribute("group", "");
 			dataset->SetAttribute("part", "0");
 			dataset->SetAttribute("file", vtu_names(i).c_str());
