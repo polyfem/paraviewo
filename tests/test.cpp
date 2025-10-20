@@ -10,6 +10,117 @@
 
 using namespace paraviewo;
 
+void run_test_prism(ParaviewWriter &writer, const std::string &name)
+{
+	Eigen::MatrixXd pts(25, 3);
+	pts << 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 
+		0, 0, 1, 0.25, 0, 1, 0, 0.25, 1, 
+		0.5, 0, 0, 0.75, 0, 0,  0.5, 0.25, 0, 
+		0.5, 0, 1, 0.75, 0, 1,  0.5, 0.25, 1, 
+
+		0.75, 0.25, 0,
+		1, 0, 0, 1, 0.25, 0, 0, 0.5, 0, 0.25, 0.5, 0,
+		0.5, 0.5, 0, 0.75, 0.5, 0, 1, 0.5, 0, 0, 0.75, 0,
+		0.25, 0.75, 0, 0.5, 0.75, 0, 0.75, 0.75, 0, 1, 0.75, 0;
+
+	Eigen::MatrixXd v(25, 1);
+	v.setRandom();
+
+	Eigen::MatrixXi tris(2, 6);
+	tris << 0, 1, 2, 3, 4, 5,
+		6, 7, 8, 9, 10, 11;
+
+	Eigen::MatrixXd v_cell(2, 1);
+	v_cell.setRandom();
+
+	writer.add_field("test", v);
+	writer.add_cell_field("ctest", v_cell);
+	writer.write_mesh(name, pts, tris);
+}
+
+void run_test_prism_quad(ParaviewWriter &writer, const std::string &name)
+{
+	Eigen::MatrixXd pts(30, 3);
+	// https://examples.vtk.org/site/VTKBook/05Chapter5/?utm_source=chatgpt.com
+	pts << 0, 0, 0,  0.25, 0, 0,  0, 0.25, 0, 
+			0, 0, 1,  0.25, 0, 1,  0, 0.25, 1, 
+			0.125,0,0.05,    0.125,0.125,0.05,   0,0.125,0.05,
+			0.125,0,1.05,  0.125,0.125,1.05,   0,0.125,1.05,
+			0,0.05,0.5, 0.25,0.05,0.5,  0,0.3,0.5,
+
+			0.5, 0, 0, 0.75, 0, 0,  0.5, 0.25, 0, 
+			0.5, 0, 1, 0.75, 0, 1,  0.5, 0.25, 1,
+			0.625,0,0,   0.625,0.125,0,  0.5,0.125,0, 
+			0.625,0,1,   0.625,0.125,1,  0.5,0.125,1,
+			0.5,0,0.5, 0.75,0,0.5,  0.5,0.25,0.5;
+
+	Eigen::MatrixXd v(30, 1);
+	v.setRandom();
+
+	Eigen::MatrixXi tris(2, 15);
+	tris << 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29;
+
+	Eigen::MatrixXd v_cell(2, 1);
+	v_cell.setRandom();
+
+	writer.add_field("test", v);
+	writer.add_cell_field("ctest", v_cell);
+	writer.write_mesh(name, pts, tris);
+}
+
+void run_test_pyramid(ParaviewWriter &writer, const std::string &name)
+{
+	Eigen::MatrixXd pts(25, 3);
+	pts << 0, 0, 0,  0.25, 0, 0, 0.25, 0.25, 0,  0, 0.25, 0, 0.125, 0.125, 0.25,
+			0.5, 0, 0,  0.75, 0, 0, 0.75, 0.25, 0,  0.5, 0.25, 0, 0.625, 0.125, 0.25,
+		
+		0.75, 0.25, 0,
+		1, 0, 0, 1, 0.25, 0, 0, 0.5, 0, 0.25, 0.5, 0,
+		0.5, 0.5, 0, 0.75, 0.5, 0, 1, 0.5, 0, 0, 0.75, 0,
+		0.25, 0.75, 0, 0.5, 0.75, 0, 0.75, 0.75, 0, 1, 0.75, 0,
+		0, 1, 0, 0.25, 1, 0;
+
+	Eigen::MatrixXd v(25, 1);
+	v.setRandom();
+
+	Eigen::MatrixXi tris(2, 5);
+	tris << 0, 1, 2, 3, 4,
+		5, 6, 7, 8, 9;
+
+	Eigen::MatrixXd v_cell(2, 1);
+	v_cell.setRandom();
+
+	writer.add_field("test", v);
+	writer.add_cell_field("ctest", v_cell);
+	writer.write_mesh(name, pts, tris);
+}
+
+void run_test_pyramid_quad(ParaviewWriter &writer, const std::string &name)
+{
+	Eigen::MatrixXd pts(26, 3);
+	pts << 0, 0, 0,  0.25, 0, 0, 0.25, 0.25, 0,  0, 0.25, 0, 0.125, 0.125, 0.25,
+			0.125,0,0.02, 0.25,0.125,0.02,  0.125,0.25,0.02, 0,0.125,0.02,
+			0.0625,0.0825,0.125, 0.1875,0.0825,0.125, 0.1875,0.2075,0.125, 0.0625,0.2075,0.125,
+
+			0.5, 0, 0,  0.75, 0, 0, 0.75, 0.25, 0,  0.5, 0.25, 0, 0.625, 0.125, 0.25,
+			0.625,0,0, 0.75,0.125,0,  0.625,0.25,0, 0.5,0.125,0,
+			0.5625,0.0625,0.125, 0.6875,0.0625,0.125, 0.6875,0.1875,0.125, 0.5625,0.1875,0.125;
+
+	Eigen::MatrixXd v(26, 1);
+	v.setRandom();
+
+	Eigen::MatrixXi tris(2, 13);
+	tris << 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 
+			13,14,15,16,17,18,19,20,21,22,23,24,25;
+
+	Eigen::MatrixXd v_cell(2, 1);
+	v_cell.setRandom();
+
+	writer.add_field("test", v);
+	writer.add_cell_field("ctest", v_cell);
+	writer.write_mesh(name, pts, tris);
+}
+
 void run_test(ParaviewWriter &writer, const std::string &name)
 {
 	Eigen::MatrixXd pts(25, 3);
@@ -74,4 +185,28 @@ TEST_CASE("vtu_sequence", "[utils]")
 TEST_CASE("hdf5_sequence", "[utils]")
 {
 	save_sequence<HDF5VTUWriter>("hdf");
+}
+
+TEST_CASE("vtu_writer_prism", "[utils]")
+{
+	VTUWriter writer;
+	run_test_prism(writer, "test_prism.vtu");
+}
+
+TEST_CASE("vtu_writer_pyramid", "[utils]")
+{
+	VTUWriter writer;
+	run_test_pyramid(writer, "test_pyramid.vtu");
+}
+
+TEST_CASE("vtu_writer_prism_quad", "[utils]")
+{
+	VTUWriter writer;
+	run_test_prism_quad(writer, "test_prism_quad.vtu");
+}
+
+TEST_CASE("vtu_writer_pyramid_quad", "[utils]")
+{
+	VTUWriter writer;
+	run_test_pyramid_quad(writer, "test_pyramid_quad.vtu");
 }

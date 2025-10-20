@@ -14,9 +14,14 @@ namespace paraviewo
 		static const int VTK_TRIANGLE = 5;
 		static const int VTK_QUAD = 9;
 		static const int VTK_HEXAHEDRON = 12;
+	  	static const int VTK_WEDGE = 13;
+		static const int VTK_PYRAMID = 14;
 		static const int VTK_POLYGON = 7;
 		static const int VTK_POLYHEDRON = 42;
 
+		static const int VTK_QUADRATIC_WEDGE = 26;
+		static const int VTK_QUADRATIC_PYRAMID = 27;
+		
 		static const int VTK_LAGRANGE_TRIANGLE = 69;
 		static const int VTK_LAGRANGE_QUADRILATERAL = 70;
 
@@ -36,8 +41,16 @@ namespace paraviewo
 				return VTK_TRIANGLE;
 			case 4:
 				return VTK_TETRA;
+			case 5:
+			  	return VTK_PYRAMID;
+			case 6:
+			  	return VTK_WEDGE;
 			case 8:
 				return VTK_HEXAHEDRON;
+			case 13:
+				return VTK_QUADRATIC_PYRAMID;
+			case 15:
+				return VTK_QUADRATIC_WEDGE;
 			default:
 				if (is_poly)
 					return VTK_POLYHEDRON;
