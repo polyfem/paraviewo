@@ -4,6 +4,44 @@
 
 namespace paraviewo
 {
+	enum class CellType
+	{
+		// === 0D / 1D ===
+		Vertex,              // VTK_VERTEX
+		Line,                // VTK_LINE
+
+		// === 2D (planar) ===
+		Triangle,            // VTK_TRIANGLE
+		Quadrilateral,       // VTK_QUAD
+		Polygon,             // VTK_POLYGON
+
+		// === 3D (volume) ===
+		Tetrahedron,         // VTK_TETRA
+		Hexahedron,          // VTK_HEXAHEDRON
+		Wedge,               // VTK_WEDGE (prism)
+		Pyramid,             // VTK_PYRAMID
+		Polyhedron,          // VTK_POLYHEDRON
+
+		// === Quadratic variants ===
+		QuadraticWedge,      // VTK_QUADRATIC_WEDGE
+		QuadraticPyramid,    // VTK_QUADRATIC_PYRAMID
+		BiquadraticWedge,    // VTK_BIQUADRATIC_QUADRATIC_WEDGE
+
+		// === Lagrange high-order ===
+		LagrangeTriangle,        // VTK_LAGRANGE_TRIANGLE
+		LagrangeQuadrilateral,   // VTK_LAGRANGE_QUADRILATERAL
+		LagrangeTetrahedron,     // VTK_LAGRANGE_TETRAHEDRON
+		LagrangeHexahedron,      // VTK_LAGRANGE_HEXAHEDRON
+		LagrangeWedge,           // VTK_LAGRANGE_WEDGE
+		LagrangePyramid          // VTK_LAGRANGE_PYRAMID
+	};
+
+	struct CellElement
+	{
+		std::vector<int> vertices;
+		CellType ctype;
+	};
+
 	class paraview_tags
 	{
 	private:
@@ -19,7 +57,8 @@ namespace paraviewo
 		static const int VTK_POLYGON = 7;
 		static const int VTK_POLYHEDRON = 42;
 
-		static const int VTK_QUADRATIC_WEDGE = 26;
+  		static const int VTK_QUADRATIC_WEDGE = 26;
+  		static const int VTK_BIQUADRATIC_QUADRATIC_WEDGE = 32;
 		static const int VTK_QUADRATIC_PYRAMID = 27;
 		
 		static const int VTK_LAGRANGE_TRIANGLE = 69;
@@ -28,7 +67,83 @@ namespace paraviewo
 		static const int VTK_LAGRANGE_TETRAHEDRON = 71;
 		static const int VTK_LAGRANGE_HEXAHEDRON = 72;
 
+  		static const int VTK_LAGRANGE_WEDGE = 73;
+  		static const int VTK_LAGRANGE_PYRAMID = 74;
+
 	public:
+		inline static int VTKTag(const int n_vertices, const CellType ctype)
+		{
+			switch (ctype)
+			{
+			// === 0D ===
+			case CellType::Vertex:
+				assert(n_vertices == 1);
+				return VTK_VERTEX;
+
+			// === 1D ===
+			case CellType::Line:
+				assert(n_vertices == 2);
+				return VTK_LINE;
+
+			// === 2D ===
+			case CellType::Triangle:
+				assert(n_vertices == 3);
+				return VTK_TRIANGLE;
+			case CellType::Quadrilateral:
+				assert(n_vertices == 4);
+				return VTK_QUAD;
+			case CellType::Polygon:
+				assert(n_vertices >= 3);
+				return VTK_POLYGON;
+
+			// === 3D ===
+			case CellType::Tetrahedron:
+				assert(n_vertices == 4);
+				return VTK_TETRA;
+			case CellType::Hexahedron:
+				assert(n_vertices == 8);
+				return VTK_HEXAHEDRON;
+			case CellType::Wedge:
+				assert(n_vertices == 6);
+				return VTK_WEDGE;
+			case CellType::Pyramid:
+				assert(n_vertices == 5);
+				return VTK_PYRAMID;
+			case CellType::Polyhedron:
+				assert(n_vertices >= 4);
+				return VTK_POLYHEDRON;
+
+			// === Quadratic / Biquadratic ===
+			case CellType::QuadraticWedge:
+				assert(n_vertices == 15);
+				return VTK_QUADRATIC_WEDGE;
+			case CellType::QuadraticPyramid:
+				assert(n_vertices == 13);
+				return VTK_QUADRATIC_PYRAMID;
+			case CellType::BiquadraticWedge:
+				assert(n_vertices == 18);
+				// assert(n_vertices == 18 || n_vertices == 21);
+				return VTK_BIQUADRATIC_QUADRATIC_WEDGE;
+
+			// === Lagrange (no assert on n_vertices) ===
+			case CellType::LagrangeTriangle:
+				return VTK_LAGRANGE_TRIANGLE;
+			case CellType::LagrangeQuadrilateral:
+				return VTK_LAGRANGE_QUADRILATERAL;
+			case CellType::LagrangeTetrahedron:
+				return VTK_LAGRANGE_TETRAHEDRON;
+			case CellType::LagrangeHexahedron:
+				return VTK_LAGRANGE_HEXAHEDRON;
+			case CellType::LagrangeWedge:
+				return VTK_LAGRANGE_WEDGE;
+			case CellType::LagrangePyramid:
+				return VTK_LAGRANGE_PYRAMID;
+
+			default:
+				return VTK_TETRA;
+			}
+		}
+		
 		inline static int VTKTagVolume(const int n_vertices, bool is_simplex, bool is_poly)
 		{
 			switch (n_vertices)
@@ -93,6 +208,7 @@ namespace paraviewo
 
 		virtual bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells) = 0;
 		virtual bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<std::vector<int>> &cells, const bool is_simplicial, const bool has_poly) = 0;
+		virtual bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<CellElement> &cells) = 0;
 
 		void add_field(const std::string &name, const Eigen::MatrixXd &data)
 		{

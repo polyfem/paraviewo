@@ -70,6 +70,7 @@ namespace paraviewo
 
 		bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells) override;
 		bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<std::vector<int>> &cells, const bool is_simplicial, const bool has_poly) override;
+		bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<CellElement> &cells) override;
 
 		void clear() override;
 

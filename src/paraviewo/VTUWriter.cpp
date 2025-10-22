@@ -209,7 +209,7 @@ namespace paraviewo
 		os << "</Cells>\n";
 	}
 
-	void VTUWriter::write_cells(const std::vector<std::vector<int>> &cells, const bool is_simplex, const bool is_poly, std::ostream &os)
+	void VTUWriter::write_cells(const std::vector<CellElement> &cells, std::ostream &os)
 	{
 		const int n_cells = cells.size();
 		os << "<Cells>\n";
@@ -217,9 +217,7 @@ namespace paraviewo
 
 		int n_cells_indices = 0;
 		for (const auto &c : cells)
-		{
-			n_cells_indices += c.size();
-		}
+			n_cells_indices += c.vertices.size();
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		if (binary_)
@@ -232,7 +230,7 @@ namespace paraviewo
 			int index = 0;
 			for (const auto &c : cells)
 			{
-				for (const int i : c)
+				for (const int i : c.vertices)
 					tmp(index++) = i;
 			}
 			base64.write(tmp.data(), tmp.size());
@@ -245,12 +243,12 @@ namespace paraviewo
 
 			for (const auto &c : cells)
 			{
-				for (int i = 0; i < c.size(); ++i)
+				for (size_t i = 0; i < c.vertices.size(); ++i)
 				{
-					const int64_t v_index = c[i];
+					const int64_t v_index = c.vertices[i];
 
 					os << v_index;
-					if (i < c.size() - 1)
+					if (i < c.vertices.size() - 1)
 					{
 						os << " ";
 					}
@@ -272,7 +270,7 @@ namespace paraviewo
 
 		for (int i = 0; i < n_cells; ++i)
 		{
-			const int int_tag = is_volume_ ? paraview_tags::VTKTagVolume(cells[i].size(), is_simplex, is_poly) : paraview_tags::VTKTagPlanar(cells[i].size(), is_simplex, is_poly);
+			const int int_tag = paraview_tags::VTKTag(cells[i].vertices.size(), cells[i].ctype);
 			const uint8_t tag = int_tag;
 
 			if (binary_)
@@ -300,7 +298,7 @@ namespace paraviewo
 		int64_t acc = 0;
 		for (int i = 0; i < n_cells; ++i)
 		{
-			acc += cells[i].size();
+			acc += cells[i].vertices.size();
 			if (binary_)
 				base64.write(acc);
 			else
@@ -393,7 +391,7 @@ namespace paraviewo
 		return true;
 	}
 
-	bool VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<std::vector<int>> &cells, const bool is_simplicial, const bool has_poly)
+	bool VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<CellElement> &cells)
 	{
 		std::ofstream os;
 		os.open(path.c_str());
@@ -409,11 +407,18 @@ namespace paraviewo
 		write_points(points, os);
 		write_point_data(os);
 		write_cell_data(os);
-		write_cells(cells, is_simplicial, has_poly, os);
+		write_cells(cells, os);
 
 		write_footer(os);
 		os.close();
 		clear();
 		return true;
 	}
+
+	bool VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<std::vector<int>> &cells, const bool is_simplicial, const bool has_poly)
+	{
+		// dummy
+		return true;
+	}
+	
 } // namespace paraviewo

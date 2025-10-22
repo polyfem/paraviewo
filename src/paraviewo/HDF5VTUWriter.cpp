@@ -250,4 +250,9 @@ namespace paraviewo
 		return true;
 	}
 
+	bool HDF5VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<CellElement> &cells)
+	{
+		return true; // TODO
+	}
+
 } // namespace paraviewo
