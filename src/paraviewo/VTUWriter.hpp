@@ -91,7 +91,6 @@ namespace paraviewo
 		void add_vector_cell_field(const std::string &name, const Eigen::MatrixXd &data) override;
 
 	private:
-		bool is_volume_;
 		bool binary_;
 
 		std::vector<VTKDataNode<double>> point_data_;

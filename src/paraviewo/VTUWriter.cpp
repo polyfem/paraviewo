@@ -101,7 +101,7 @@ namespace paraviewo
 					}
 				}
 
-				if (!is_volume_)
+				if (!(points.cols() == 3))
 					os << " 0";
 
 				os << "\n";
@@ -377,8 +377,6 @@ namespace paraviewo
 			return false;
 		}
 
-		is_volume_ = points.cols() == 3;
-
 		write_header(points.rows(), cells.rows(), os);
 		write_points(points, os);
 		write_point_data(os);
@@ -400,8 +398,6 @@ namespace paraviewo
 			os.close();
 			return false;
 		}
-
-		is_volume_ = points.cols() == 3;
 
 		write_header(points.rows(), cells.size(), os);
 		write_points(points, os);

@@ -81,8 +81,6 @@ namespace paraviewo
 		void add_vector_cell_field(const std::string &name, const Eigen::MatrixXd &data) override;
 
 	private:
-		bool is_volume_;
-
 		std::vector<HDF5VTKDataNode<double>> point_data_;
 		std::string current_scalar_point_data_;
 		std::string current_vector_point_data_;

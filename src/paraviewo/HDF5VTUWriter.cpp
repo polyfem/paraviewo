@@ -47,7 +47,7 @@ namespace paraviewo
 				tmp(d, i) = points(d, i);
 			}
 
-			if (!is_volume_)
+			if (!(points.cols() == 3))
 				tmp(d, 2) = 0;
 		}
 
@@ -216,8 +216,6 @@ namespace paraviewo
 
 	bool HDF5VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells, const CellType ctype)
 	{
-		is_volume_ = points.cols() == 3;
-
 		h5pp::File file(path, h5pp::FileAccess::REPLACE);
 		file.setCompressionLevel(5);
 		file.createGroup("VTKHDF");
@@ -234,8 +232,6 @@ namespace paraviewo
 
 	bool HDF5VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<CellElement> &cells)
 	{
-		is_volume_ = points.cols() == 3;
-
 		h5pp::File file(path, h5pp::FileAccess::REPLACE);
 		file.setCompressionLevel(5);
 		file.createGroup("VTKHDF");
