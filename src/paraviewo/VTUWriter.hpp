@@ -78,8 +78,7 @@ namespace paraviewo
 	public:
 		VTUWriter(bool binary = true);
 
-		bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells) override;
-		bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<std::vector<int>> &cells, const bool is_simplicial, const bool has_poly) override;
+		bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells, const CellType ctype) override;
 		bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<CellElement> &cells) override;
 
 		void clear() override;
@@ -108,7 +107,7 @@ namespace paraviewo
 		void write_header(const int n_vertices, const int n_elements, std::ostream &os);
 		void write_footer(std::ostream &os);
 		void write_points(const Eigen::MatrixXd &points, std::ostream &os);
-		void write_cells(const Eigen::MatrixXi &cells, std::ostream &os);
+		void write_cells(const Eigen::MatrixXi &cells, const CellType ctype, std::ostream &os);
 		void write_cells(const std::vector<CellElement> &cells, std::ostream &os);
 	};
 } // namespace paraviewo

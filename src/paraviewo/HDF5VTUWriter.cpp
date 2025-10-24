@@ -54,7 +54,7 @@ namespace paraviewo
 		file.writeDataset(tmp, "/VTKHDF/Points");
 	}
 
-	void HDF5VTUWriter::write_cells(const Eigen::MatrixXi &cells, const std::string &grp, h5pp::File &file)
+	void HDF5VTUWriter::write_cells(const Eigen::MatrixXi &cells, const CellType ctype, const std::string &grp, h5pp::File &file)
 	{
 		const int n_cells = cells.rows();
 		const int n_cell_vertices = cells.cols();
@@ -80,7 +80,7 @@ namespace paraviewo
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		const uint8_t int_tag = is_volume_ ? paraview_tags::VTKTagVolume(n_cell_vertices, true, false) : paraview_tags::VTKTagPlanar(n_cell_vertices, true, false);
+		const int int_tag = paraview_tags::VTKTag(n_cell_vertices, ctype);
 		Eigen::Matrix<uint8_t, Eigen::Dynamic, 1> type_array(n_cells);
 		type_array.setConstant(int_tag);
 		file.writeDataset(type_array, "/VTKHDF/Types");
@@ -103,7 +103,7 @@ namespace paraviewo
 		file.writeDataset(offset_array, "/VTKHDF/Offsets");
 	}
 
-	void HDF5VTUWriter::write_cells(const std::vector<std::vector<int>> &cells, const bool is_simplex, const bool is_poly, const std::string &grp, h5pp::File &file)
+	void HDF5VTUWriter::write_cells(const std::vector<CellElement> &cells, const std::string &grp, h5pp::File &file)
 	{
 		const int n_cells = cells.size();
 		int index;
@@ -111,7 +111,7 @@ namespace paraviewo
 		int n_cells_indices = 0;
 		for (const auto &c : cells)
 		{
-			n_cells_indices += c.size();
+			n_cells_indices += c.vertices.size();
 		}
 		file.writeDataset(std::array<int64_t, 1>{{n_cells_indices}}, grp + "/NumberOfConnectivityIds");
 
@@ -119,7 +119,7 @@ namespace paraviewo
 		index = 0;
 		for (const auto &c : cells)
 		{
-			for (const int i : c)
+			for (const int i : c.vertices)
 				connectivity_array[index++] = i;
 		}
 
@@ -134,7 +134,7 @@ namespace paraviewo
 
 		for (int i = 0; i < n_cells; ++i)
 		{
-			const int int_tag = is_volume_ ? paraview_tags::VTKTagVolume(cells[i].size(), is_simplex, is_poly) : paraview_tags::VTKTagPlanar(cells[i].size(), is_simplex, is_poly);
+			const int int_tag = paraview_tags::VTKTag(cells[i].vertices.size(), cells[i].ctype);
 			const uint8_t tag = int_tag;
 			type_array[index++] = tag;
 		}
@@ -152,7 +152,7 @@ namespace paraviewo
 		offset_array[index++] = acc;
 		for (int i = 0; i < n_cells; ++i)
 		{
-			acc += cells[i].size();
+			acc += cells[i].vertices.size();
 			offset_array[index++] = acc;
 		}
 
@@ -214,7 +214,7 @@ namespace paraviewo
 		current_vector_cell_data_ = name;
 	}
 
-	bool HDF5VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells)
+	bool HDF5VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells, const CellType ctype)
 	{
 		is_volume_ = points.cols() == 3;
 
@@ -225,14 +225,14 @@ namespace paraviewo
 		write_header(points.rows(), cells.rows(), "VTKHDF", file);
 		write_points(points, file);
 		write_data(file);
-		write_cells(cells, "VTKHDF", file);
+		write_cells(cells, ctype, "VTKHDF", file);
 
 		file.flush();
 		clear();
 		return true;
 	}
 
-	bool HDF5VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<std::vector<int>> &cells, const bool is_simplicial, const bool has_poly)
+	bool HDF5VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<CellElement> &cells)
 	{
 		is_volume_ = points.cols() == 3;
 
@@ -243,16 +243,11 @@ namespace paraviewo
 		write_header(points.rows(), cells.size(), "VTKHDF", file);
 		write_points(points, file);
 		write_data(file);
-		write_cells(cells, is_simplicial, has_poly, "VTKHDF", file);
+		write_cells(cells, "VTKHDF", file);
 
 		file.flush();
 		clear();
 		return true;
-	}
-
-	bool HDF5VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<CellElement> &cells)
-	{
-		return true; // TODO
 	}
 
 } // namespace paraviewo
