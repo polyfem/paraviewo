@@ -79,6 +79,7 @@ namespace paraviewo
 		VTUWriter(bool binary = true);
 
 		bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells, const CellType ctype) override;
+		bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<std::vector<int>> &cells, const CellType ctype) override;
 		bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<CellElement> &cells) override;
 
 		void clear() override;

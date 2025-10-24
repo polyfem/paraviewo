@@ -138,6 +138,7 @@ namespace paraviewo
 		virtual ~ParaviewWriter(){};
 
 		virtual bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells, const CellType ctype) = 0;
+		virtual bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<std::vector<int>> &cells, const CellType ctype) = 0;
 		virtual bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<CellElement> &cells) = 0;
 
 		void add_field(const std::string &name, const Eigen::MatrixXd &data)

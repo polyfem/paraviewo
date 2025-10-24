@@ -389,6 +389,15 @@ namespace paraviewo
 		return true;
 	}
 
+	bool VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<std::vector<int>> &cells, const CellType ctype)
+	{
+		Eigen::MatrixXi cells_mat(cells.size(), cells[0].size());
+		for (int i = 0; i < cells.size(); ++i)
+			for (int j = 0; j < cells[i].size(); ++j)
+				cells_mat(i, j) = cells[i][j];
+		return write_mesh(path, points, cells_mat, ctype);
+	}
+
 	bool VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<CellElement> &cells)
 	{
 		std::ofstream os;
