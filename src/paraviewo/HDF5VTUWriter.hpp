@@ -66,6 +66,8 @@ namespace paraviewo
 	class HDF5VTUWriter : public ParaviewWriter
 	{
 	public:
+	    using ParaviewWriter::write_mesh;
+
 		HDF5VTUWriter(bool binary = true);
 
 		bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells, const CellType ctype) override;

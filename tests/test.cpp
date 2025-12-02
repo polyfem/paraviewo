@@ -37,7 +37,41 @@ void run_test(ParaviewWriter &writer, const std::string &name)
 	writer.write_mesh(name, pts, tris, CellType::Triangle);
 }
 
-void run_test_vecvec(ParaviewWriter &writer, const std::string &name)
+void run_test_vecvec_vtu(VTUWriter &writer, const std::string &name)
+{
+	Eigen::MatrixXd pts(25, 3);
+	pts << 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0.25, 0.25, 0,
+		0.5, 0, 0, 0.5, 0.25, 0, 0.75, 0, 0, 0.75, 0.25, 0,
+		1, 0, 0, 1, 0.25, 0, 0, 0.5, 0, 0.25, 0.5, 0,
+		0.5, 0.5, 0, 0.75, 0.5, 0, 1, 0.5, 0, 0, 0.75, 0,
+		0.25, 0.75, 0, 0.5, 0.75, 0, 0.75, 0.75, 0, 1, 0.75, 0,
+		0, 1, 0, 0.25, 1, 0, 0.5, 1, 0, 0.75, 1, 0,
+		1, 1, 0;
+	pts = pts.leftCols(2).eval();
+
+	Eigen::MatrixXd v(25, 1);
+	v.setRandom();
+
+	std::vector<std::vector<int>> cells;
+	cells.resize(2);
+	for (int i=0; i<3; i++)
+		cells[0].push_back(i);
+	for (int i=0; i<3; i++)
+		cells[1].push_back(i+3);	
+
+	Eigen::MatrixXi tris(2, 3);
+	tris << 0, 1, 2,
+		4, 5, 6;
+
+	Eigen::MatrixXd v_cell(2, 1);
+	v_cell.setRandom();
+
+	writer.add_field("test", v);
+	writer.add_cell_field("ctest", v_cell);
+	writer.write_mesh(name, pts, cells, CellType::Triangle);
+}
+
+void run_test_vecvec_hdf5(HDF5VTUWriter &writer, const std::string &name)
 {
 	Eigen::MatrixXd pts(25, 3);
 	pts << 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0.25, 0.25, 0,
@@ -192,8 +226,14 @@ TEST_CASE("vtu_writer_mixed", "[utils]")
 	run_test_mixed(writer, "test_mixed.vtu");
 }
 
-TEST_CASE("vtu_writer_vecvec", "[utils]")
+TEST_CASE("vtu_writer_vecvec_vtu", "[utils]")
 {
 	VTUWriter writer;
-	run_test_vecvec(writer, "test_vecvec.vtu");
+	run_test_vecvec_vtu(writer, "test_vecvec.vtu");
+}
+
+TEST_CASE("vtu_writer_vecvec_hdf5", "[utils]")
+{
+	HDF5VTUWriter writer;
+	run_test_vecvec_hdf5(writer, "test_vecvec.vtu");
 }

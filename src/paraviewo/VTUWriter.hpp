@@ -76,6 +76,8 @@ namespace paraviewo
 	class VTUWriter : public ParaviewWriter
 	{
 	public:
+	    using ParaviewWriter::write_mesh;
+
 		VTUWriter(bool binary = true);
 
 		bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells, const CellType ctype) override;
