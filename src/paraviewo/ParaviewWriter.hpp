@@ -40,23 +40,24 @@ namespace paraviewo
 		static const int VTK_TRIANGLE = 5;
 		static const int VTK_QUAD = 9;
 		static const int VTK_HEXAHEDRON = 12;
-	  	static const int VTK_WEDGE = 13;
+		static const int VTK_WEDGE = 13;
 		static const int VTK_PYRAMID = 14;
 		static const int VTK_POLYGON = 7;
 		static const int VTK_POLYHEDRON = 42;
 
-  		static const int VTK_QUADRATIC_WEDGE = 26;
-  		static const int VTK_BIQUADRATIC_QUADRATIC_WEDGE = 32;
+		static const int VTK_QUADRATIC_WEDGE = 26;
+		static const int VTK_BIQUADRATIC_QUADRATIC_WEDGE = 32;
 		static const int VTK_QUADRATIC_PYRAMID = 27;
-		
+		static const int VTK_TRIQUADRATIC_PYRAMID = 37;
+
 		static const int VTK_LAGRANGE_TRIANGLE = 69;
 		static const int VTK_LAGRANGE_QUADRILATERAL = 70;
 
 		static const int VTK_LAGRANGE_TETRAHEDRON = 71;
 		static const int VTK_LAGRANGE_HEXAHEDRON = 72;
 
-  		static const int VTK_LAGRANGE_WEDGE = 73;
-  		static const int VTK_LAGRANGE_PYRAMID = 74;
+		static const int VTK_LAGRANGE_WEDGE = 73;
+		static const int VTK_LAGRANGE_PYRAMID = 74;
 
 	public:
 		inline static int VTKTag(const int n_vertices, const CellType ctype)
@@ -79,13 +80,13 @@ namespace paraviewo
 					return VTK_TRIANGLE;
 				else
 					return VTK_LAGRANGE_TRIANGLE;
-			
+
 			case CellType::Quadrilateral:
 				if (n_vertices == 4)
 					return VTK_QUAD;
 				else
 					return VTK_LAGRANGE_QUADRILATERAL;
-			
+
 			case CellType::Polygon:
 				if (n_vertices > 4)
 					return VTK_POLYGON;
@@ -96,28 +97,30 @@ namespace paraviewo
 					return VTK_TETRA;
 				else
 					return VTK_LAGRANGE_TETRAHEDRON;
-			
+
 			case CellType::Hexahedron:
 				if (n_vertices == 8)
 					return VTK_HEXAHEDRON;
 				else
 					return VTK_LAGRANGE_HEXAHEDRON;
-			
+
 			case CellType::Wedge:
 				if (n_vertices == 6)
 					return VTK_WEDGE;
 				else if (n_vertices == 15)
 					return VTK_QUADRATIC_WEDGE;
-				else if (n_vertices == 18)  // (n_vertices == 18 || n_vertices == 21);
+				else if (n_vertices == 18) // (n_vertices == 18 || n_vertices == 21);
 					return VTK_BIQUADRATIC_QUADRATIC_WEDGE;
 				else
 					return VTK_LAGRANGE_WEDGE;
-			
+
 			case CellType::Pyramid:
 				if (n_vertices == 5)
 					return VTK_PYRAMID;
 				else if (n_vertices == 13)
 					return VTK_QUADRATIC_PYRAMID;
+				else if (n_vertices == 19)
+					return VTK_TRIQUADRATIC_PYRAMID;
 				else
 					return VTK_LAGRANGE_PYRAMID;
 
@@ -125,7 +128,7 @@ namespace paraviewo
 				if (n_vertices >= 4)
 					return VTK_POLYHEDRON;
 
-			default:  // ?
+			default: // ?
 				return VTK_TETRA;
 			}
 		}
@@ -134,8 +137,8 @@ namespace paraviewo
 	class ParaviewWriter
 	{
 	public:
-		ParaviewWriter(){};
-		virtual ~ParaviewWriter(){};
+		ParaviewWriter() {};
+		virtual ~ParaviewWriter() {};
 
 		virtual bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells, const CellType ctype) = 0;
 		virtual bool write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<CellElement> &cells) = 0;
