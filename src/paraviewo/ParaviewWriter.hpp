@@ -113,6 +113,27 @@ namespace paraviewo
 				add_vector_cell_field(name, tmp);
 		}
 
+		void set_edges(const Eigen::MatrixXi &edges)
+		{
+			edges_ = edges;
+		}
+
+		void add_edge_field(const std::string &name, const Eigen::MatrixXd &data)
+		{
+			using std::abs;
+
+			Eigen::MatrixXd tmp;
+			tmp.resizeLike(data);
+
+			for (long i = 0; i < data.size(); ++i)
+				tmp(i) = abs(data(i)) < 1e-16 ? 0 : data(i);
+
+			if (tmp.cols() == 1)
+				add_scalar_edge_field(name, tmp);
+			else
+				add_vector_edge_field(name, tmp);
+		}
+
 		virtual void clear() = 0;
 
 	protected:
@@ -121,5 +142,10 @@ namespace paraviewo
 
 		virtual void add_scalar_cell_field(const std::string &name, const Eigen::MatrixXd &data) = 0;
 		virtual void add_vector_cell_field(const std::string &name, const Eigen::MatrixXd &data) = 0;
+
+		virtual void add_scalar_edge_field(const std::string &name, const Eigen::MatrixXd &data) = 0;
+		virtual void add_vector_edge_field(const std::string &name, const Eigen::MatrixXd &data) = 0;
+
+		Eigen::MatrixXi edges_;
 	};
 } // namespace paraviewo

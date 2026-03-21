@@ -321,6 +321,8 @@ namespace paraviewo
 	{
 		point_data_.clear();
 		cell_data_.clear();
+		edge_field_data_.clear();
+		edges_.resize(0, 0);
 	}
 
 	void VTUWriter::add_scalar_field(const std::string &name, const Eigen::MatrixXd &data)
@@ -369,6 +371,47 @@ namespace paraviewo
 		current_vector_cell_data_ = name;
 	}
 
+	void VTUWriter::add_scalar_edge_field(const std::string &name, const Eigen::MatrixXd &data)
+	{
+		edge_field_data_.push_back({name, data, 1});
+		current_scalar_cell_data_ = name;
+	}
+
+	void VTUWriter::add_vector_edge_field(const std::string &name, const Eigen::MatrixXd &data)
+	{
+		Eigen::MatrixXd tmp = data;
+		if (data.cols() == 2)
+		{
+			tmp.conservativeResize(tmp.rows(), 3);
+			tmp.col(2).setZero();
+		}
+		edge_field_data_.push_back({name, tmp, static_cast<int>(tmp.cols())});
+		current_vector_cell_data_ = name;
+	}
+
+	void VTUWriter::merge_edge_data(int num_face_cells)
+	{
+		const int num_edges = edges_.rows();
+		if (num_edges <= 0)
+			return;
+
+		// Pad existing cell data with zeros for edge cells
+		for (auto &node : cell_data_)
+			node.pad_rows(num_edges);
+
+		// For each edge field, create a padded cell data node
+		// (zeros for face cells, then real edge values)
+		for (const auto &efd : edge_field_data_)
+		{
+			Eigen::MatrixXd padded(num_face_cells + num_edges, efd.data.cols());
+			padded.topRows(num_face_cells).setZero();
+			padded.bottomRows(num_edges) = efd.data;
+
+			cell_data_.push_back(VTKDataNode<double>(binary_));
+			cell_data_.back().initialize(efd.name, "Float64", padded, efd.n_components);
+		}
+	}
+
 	bool VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells)
 	{
 		std::ofstream os;
@@ -381,11 +424,39 @@ namespace paraviewo
 
 		is_volume_ = points.cols() == 3;
 
-		write_header(points.rows(), cells.rows(), os);
-		write_points(points, os);
-		write_point_data(os);
-		write_cell_data(os);
-		write_cells(cells, os);
+		const int num_edges = edges_.rows();
+		if (num_edges > 0)
+		{
+			// Convert to vector<vector<int>> and append edges
+			const int num_face_cells = cells.rows();
+			merge_edge_data(num_face_cells);
+
+			std::vector<std::vector<int>> all_cells;
+			all_cells.reserve(num_face_cells + num_edges);
+			for (int i = 0; i < num_face_cells; ++i)
+			{
+				std::vector<int> cell(cells.cols());
+				for (int j = 0; j < cells.cols(); ++j)
+					cell[j] = cells(i, j);
+				all_cells.push_back(std::move(cell));
+			}
+			for (int i = 0; i < num_edges; ++i)
+				all_cells.push_back({edges_(i, 0), edges_(i, 1)});
+
+			write_header(points.rows(), num_face_cells + num_edges, os);
+			write_points(points, os);
+			write_point_data(os);
+			write_cell_data(os);
+			write_cells(all_cells, /*is_simplex=*/true, /*is_poly=*/false, os);
+		}
+		else
+		{
+			write_header(points.rows(), cells.rows(), os);
+			write_points(points, os);
+			write_point_data(os);
+			write_cell_data(os);
+			write_cells(cells, os);
+		}
 
 		write_footer(os);
 		os.close();
@@ -405,11 +476,30 @@ namespace paraviewo
 
 		is_volume_ = points.cols() == 3;
 
-		write_header(points.rows(), cells.size(), os);
-		write_points(points, os);
-		write_point_data(os);
-		write_cell_data(os);
-		write_cells(cells, is_simplicial, has_poly, os);
+		const int num_edges = edges_.rows();
+		if (num_edges > 0)
+		{
+			const int num_face_cells = cells.size();
+			merge_edge_data(num_face_cells);
+
+			std::vector<std::vector<int>> all_cells = cells;
+			for (int i = 0; i < num_edges; ++i)
+				all_cells.push_back({edges_(i, 0), edges_(i, 1)});
+
+			write_header(points.rows(), num_face_cells + num_edges, os);
+			write_points(points, os);
+			write_point_data(os);
+			write_cell_data(os);
+			write_cells(all_cells, is_simplicial, has_poly, os);
+		}
+		else
+		{
+			write_header(points.rows(), cells.size(), os);
+			write_points(points, os);
+			write_point_data(os);
+			write_cell_data(os);
+			write_cells(cells, is_simplicial, has_poly, os);
+		}
 
 		write_footer(os);
 		os.close();

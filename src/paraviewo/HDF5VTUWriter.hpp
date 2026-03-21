@@ -80,6 +80,9 @@ namespace paraviewo
 		void add_scalar_cell_field(const std::string &name, const Eigen::MatrixXd &data) override;
 		void add_vector_cell_field(const std::string &name, const Eigen::MatrixXd &data) override;
 
+		void add_scalar_edge_field(const std::string &name, const Eigen::MatrixXd &data) override;
+		void add_vector_edge_field(const std::string &name, const Eigen::MatrixXd &data) override;
+
 	private:
 		bool is_volume_;
 
@@ -91,6 +94,14 @@ namespace paraviewo
 		std::string current_scalar_cell_data_;
 		std::string current_vector_cell_data_;
 
+		struct RawFieldData
+		{
+			std::string name;
+			Eigen::MatrixXd data;
+		};
+		std::vector<RawFieldData> edge_field_data_;
+
+		void merge_edge_data(int num_face_cells);
 		void write_data(h5pp::File &file);
 		void write_header(const int n_vertices, const int n_elements, const std::string &grp, h5pp::File &file);
 		void write_points(const Eigen::MatrixXd &points, h5pp::File &file);

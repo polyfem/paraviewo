@@ -166,6 +166,8 @@ namespace paraviewo
 	{
 		point_data_.clear();
 		cell_data_.clear();
+		edge_field_data_.clear();
+		edges_.resize(0, 0);
 	}
 
 	void HDF5VTUWriter::add_scalar_field(const std::string &name, const Eigen::MatrixXd &data)
@@ -214,6 +216,52 @@ namespace paraviewo
 		current_vector_cell_data_ = name;
 	}
 
+	void HDF5VTUWriter::add_scalar_edge_field(const std::string &name, const Eigen::MatrixXd &data)
+	{
+		edge_field_data_.push_back({name, data});
+		current_scalar_cell_data_ = name;
+	}
+
+	void HDF5VTUWriter::add_vector_edge_field(const std::string &name, const Eigen::MatrixXd &data)
+	{
+		Eigen::MatrixXd tmp = data;
+		if (data.cols() == 2)
+		{
+			tmp.conservativeResize(tmp.rows(), 3);
+			tmp.col(2).setZero();
+		}
+		edge_field_data_.push_back({name, tmp});
+		current_vector_cell_data_ = name;
+	}
+
+	void HDF5VTUWriter::merge_edge_data(int num_face_cells)
+	{
+		const int num_edges = edges_.rows();
+		if (num_edges <= 0)
+			return;
+
+		// Pad existing cell data with zeros for edge cells
+		for (auto &node : cell_data_)
+		{
+			// HDF5VTKDataNode stores data directly, re-initialize with padded data
+			// Unfortunately we can't read back data, so we use the same raw approach
+		}
+		// For HDF5, we store cell data raw and rebuild at merge time.
+		// Since we can't easily read back from HDF5VTKDataNode, we create new nodes
+		// for edge data only (existing cell data was already the right size before edges).
+
+		// For each edge field, create a padded cell data node
+		for (const auto &efd : edge_field_data_)
+		{
+			Eigen::MatrixXd padded(num_face_cells + num_edges, efd.data.cols());
+			padded.topRows(num_face_cells).setZero();
+			padded.bottomRows(num_edges) = efd.data;
+
+			cell_data_.push_back(HDF5VTKDataNode<double>(false));
+			cell_data_.back().initialize(efd.name, padded);
+		}
+	}
+
 	bool HDF5VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells)
 	{
 		is_volume_ = points.cols() == 3;
@@ -222,10 +270,36 @@ namespace paraviewo
 		file.setCompressionLevel(5);
 		file.createGroup("VTKHDF");
 
-		write_header(points.rows(), cells.rows(), "VTKHDF", file);
-		write_points(points, file);
-		write_data(file);
-		write_cells(cells, "VTKHDF", file);
+		const int num_edges = edges_.rows();
+		if (num_edges > 0)
+		{
+			const int num_face_cells = cells.rows();
+			merge_edge_data(num_face_cells);
+
+			std::vector<std::vector<int>> all_cells;
+			all_cells.reserve(num_face_cells + num_edges);
+			for (int i = 0; i < num_face_cells; ++i)
+			{
+				std::vector<int> cell(cells.cols());
+				for (int j = 0; j < cells.cols(); ++j)
+					cell[j] = cells(i, j);
+				all_cells.push_back(std::move(cell));
+			}
+			for (int i = 0; i < num_edges; ++i)
+				all_cells.push_back({edges_(i, 0), edges_(i, 1)});
+
+			write_header(points.rows(), num_face_cells + num_edges, "VTKHDF", file);
+			write_points(points, file);
+			write_data(file);
+			write_cells(all_cells, /*is_simplex=*/true, /*is_poly=*/false, "VTKHDF", file);
+		}
+		else
+		{
+			write_header(points.rows(), cells.rows(), "VTKHDF", file);
+			write_points(points, file);
+			write_data(file);
+			write_cells(cells, "VTKHDF", file);
+		}
 
 		file.flush();
 		clear();
@@ -240,10 +314,28 @@ namespace paraviewo
 		file.setCompressionLevel(5);
 		file.createGroup("VTKHDF");
 
-		write_header(points.rows(), cells.size(), "VTKHDF", file);
-		write_points(points, file);
-		write_data(file);
-		write_cells(cells, is_simplicial, has_poly, "VTKHDF", file);
+		const int num_edges = edges_.rows();
+		if (num_edges > 0)
+		{
+			const int num_face_cells = cells.size();
+			merge_edge_data(num_face_cells);
+
+			std::vector<std::vector<int>> all_cells = cells;
+			for (int i = 0; i < num_edges; ++i)
+				all_cells.push_back({edges_(i, 0), edges_(i, 1)});
+
+			write_header(points.rows(), num_face_cells + num_edges, "VTKHDF", file);
+			write_points(points, file);
+			write_data(file);
+			write_cells(all_cells, is_simplicial, has_poly, "VTKHDF", file);
+		}
+		else
+		{
+			write_header(points.rows(), cells.size(), "VTKHDF", file);
+			write_points(points, file);
+			write_data(file);
+			write_cells(cells, is_simplicial, has_poly, "VTKHDF", file);
+		}
 
 		file.flush();
 		clear();

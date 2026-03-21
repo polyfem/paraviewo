@@ -64,6 +64,26 @@ namespace paraviewo
 
 		inline bool empty() const { return data_.size() <= 0; }
 
+		/// @brief Append n zero rows to the data (accounting for binary transposition).
+		void pad_rows(int n)
+		{
+			if (n <= 0)
+				return;
+			if (binary_)
+			{
+				// data_ is transposed: original rows are stored as columns
+				const int old_cols = data_.cols();
+				data_.conservativeResize(data_.rows(), old_cols + n);
+				data_.rightCols(n).setZero();
+			}
+			else
+			{
+				const int old_rows = data_.rows();
+				data_.conservativeResize(old_rows + n, data_.cols());
+				data_.bottomRows(n).setZero();
+			}
+		}
+
 	private:
 		std::string name_;
 		bool binary_;
@@ -90,6 +110,9 @@ namespace paraviewo
 		void add_scalar_cell_field(const std::string &name, const Eigen::MatrixXd &data) override;
 		void add_vector_cell_field(const std::string &name, const Eigen::MatrixXd &data) override;
 
+		void add_scalar_edge_field(const std::string &name, const Eigen::MatrixXd &data) override;
+		void add_vector_edge_field(const std::string &name, const Eigen::MatrixXd &data) override;
+
 	private:
 		bool is_volume_;
 		bool binary_;
@@ -102,6 +125,15 @@ namespace paraviewo
 		std::string current_scalar_cell_data_;
 		std::string current_vector_cell_data_;
 
+		struct RawFieldData
+		{
+			std::string name;
+			Eigen::MatrixXd data;
+			int n_components;
+		};
+		std::vector<RawFieldData> edge_field_data_;
+
+		void merge_edge_data(int num_face_cells);
 		void write_point_data(std::ostream &os);
 		void write_cell_data(std::ostream &os);
 		void write_header(const int n_vertices, const int n_elements, std::ostream &os);
