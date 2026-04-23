@@ -453,6 +453,7 @@ namespace paraviewo
 
 	bool VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const Eigen::MatrixXi &cells, const CellType ctype)
 	{
+		std::vector<char> io_buffer(1 << 20);
 		std::ofstream os;
 		os.open(path.c_str(), std::ios::binary);
 		if (!os.good())
@@ -460,6 +461,7 @@ namespace paraviewo
 			os.close();
 			return false;
 		}
+		os.rdbuf()->pubsetbuf(io_buffer.data(), static_cast<std::streamsize>(io_buffer.size()));
 
 		uint64_t offset = 0;
 
@@ -487,6 +489,7 @@ namespace paraviewo
 
 	bool VTUWriter::write_mesh(const std::string &path, const Eigen::MatrixXd &points, const std::vector<CellElement> &cells)
 	{
+		std::vector<char> io_buffer(1 << 20);
 		std::ofstream os;
 		os.open(path.c_str(), std::ios::binary);
 		if (!os.good())
@@ -494,6 +497,7 @@ namespace paraviewo
 			os.close();
 			return false;
 		}
+		os.rdbuf()->pubsetbuf(io_buffer.data(), static_cast<std::streamsize>(io_buffer.size()));
 
 		uint64_t offset = 0;
 
