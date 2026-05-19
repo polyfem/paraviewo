@@ -126,6 +126,7 @@ target_link_libraries(paraviewo PUBLIC tinyxml2)
 # h5pp + HDF5 library
 include(hdf5)
 target_link_libraries(paraviewo PUBLIC hdf5::hdf5)
+target_compile_definitions(paraviewo PUBLIC H5_USE_110_API)
 
 include(h5pp)
 target_link_libraries(paraviewo PUBLIC h5pp::h5pp)
