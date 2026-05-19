@@ -19,19 +19,19 @@ endif()
 
 # Include user-provided default options if available. We do that before the main
 # `project()` so that we can define the C/C++ compilers from the option file.
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ParaviwoOptions.cmake)
-    message(STATUS "Using local options file: ${CMAKE_CURRENT_SOURCE_DIR}/ParaviwoOptions.cmake")
-    include(${CMAKE_CURRENT_SOURCE_DIR}/ParaviwoOptions.cmake)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ParaviewoOptions.cmake)
+    message(STATUS "Using local options file: ${CMAKE_CURRENT_SOURCE_DIR}/ParaviewoOptions.cmake")
+    include(${CMAKE_CURRENT_SOURCE_DIR}/ParaviewoOptions.cmake)
 endif()
 
 # Enable ccache if available
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
-  option(PARAVIWO_WITH_CCACHE "Enable ccache when building ParaviewO" ${PARAVIEWO_TOPLEVEL_PROJECT})
+  option(PARAVIEWO_WITH_CCACHE "Enable ccache when building ParaviewO" ${PARAVIEWO_TOPLEVEL_PROJECT})
 else()
-  option(PARAVIWO_WITH_CCACHE "Enable ccache when building ParaviewO" OFF)
+  option(PARAVIEWO_WITH_CCACHE "Enable ccache when building ParaviewO" OFF)
 endif()
-if(PARAVIWO_WITH_CCACHE AND CCACHE_PROGRAM)
+if(PARAVIEWO_WITH_CCACHE AND CCACHE_PROGRAM)
   message(STATUS "Enabling Ccache support")
   set(ccacheEnv
     CCACHE_BASEDIR=${CMAKE_BINARY_DIR}
@@ -60,6 +60,7 @@ project(ParaviewO DESCRIPTION "A simple C++ library to write Paraview Files" LAN
 
 option(PARAVIEWO_WITH_TESTS       "Enables unit test"                  ON)
 option(PARAVIEWO_BUILD_DOCS       "Build documentation using Doxygen" OFF)
+option(PARAVIEWO_WITH_HDF5        "Enable HDF5 support"                ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/paraviewo/")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/recipes/")
@@ -124,11 +125,16 @@ include(tinyxml)
 target_link_libraries(paraviewo PUBLIC tinyxml2)
 
 # h5pp + HDF5 library
-include(hdf5)
-target_link_libraries(paraviewo PUBLIC hdf5::hdf5)
+if(PARAVIEWO_WITH_HDF5)
+    include(hdf5)
+    target_link_libraries(paraviewo PUBLIC hdf5::hdf5)
+    target_compile_definitions(paraviewo PUBLIC H5_USE_110_API)
 
-include(h5pp)
-target_link_libraries(paraviewo PUBLIC h5pp::h5pp)
+    include(h5pp)
+    target_link_libraries(paraviewo PUBLIC h5pp::h5pp)
+
+    target_compile_definitions(paraviewo PUBLIC PARAVIEWO_WITH_HDF5)
+endif()
 
 # Extra warnings (link this here so it has top priority)
 include(paraviewo_warnings)

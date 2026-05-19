@@ -1,6 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <paraviewo/VTUWriter.hpp>
+#ifdef PARAVIEWO_WITH_HDF5
 #include <paraviewo/HDF5VTUWriter.hpp>
+#endif
 #include <paraviewo/PVDWriter.hpp>
 
 #include <Eigen/Dense>
@@ -71,6 +73,7 @@ void run_test_vecvec_vtu(VTUWriter &writer, const std::string &name)
 	writer.write_mesh(name, pts, cells, CellType::Triangle);
 }
 
+#ifdef PARAVIEWO_WITH_HDF5
 void run_test_vecvec_hdf5(HDF5VTUWriter &writer, const std::string &name)
 {
 	Eigen::MatrixXd pts(25, 3);
@@ -104,6 +107,7 @@ void run_test_vecvec_hdf5(HDF5VTUWriter &writer, const std::string &name)
 	writer.add_cell_field("ctest", v_cell);
 	writer.write_mesh(name, pts, cells, CellType::Triangle);
 }
+#endif
 
 void run_test_prism_quad(ParaviewWriter &writer, const std::string &name)
 {
@@ -220,20 +224,9 @@ TEST_CASE("vtu_writer", "[utils]")
 	run_test(writer, "test.vtu");
 }
 
-TEST_CASE("hdf5_writer", "[utils]")
-{
-	HDF5VTUWriter writer;
-	run_test(writer, "test.hdf");
-}
-
 TEST_CASE("vtu_sequence", "[utils]")
 {
 	save_sequence<VTUWriter>("vtu");
-}
-
-TEST_CASE("hdf5_sequence", "[utils]")
-{
-	save_sequence<HDF5VTUWriter>("hdf");
 }
 
 TEST_CASE("vtu_writer_prism_quad", "[utils]")
@@ -254,8 +247,21 @@ TEST_CASE("vtu_writer_vecvec_vtu", "[utils]")
 	run_test_vecvec_vtu(writer, "test_vecvec.vtu");
 }
 
+#ifdef PARAVIEWO_WITH_HDF5
+TEST_CASE("hdf5_writer", "[utils]")
+{
+	HDF5VTUWriter writer;
+	run_test(writer, "test.hdf");
+}
+
+TEST_CASE("hdf5_sequence", "[utils]")
+{
+	save_sequence<HDF5VTUWriter>("hdf");
+}
+
 TEST_CASE("vtu_writer_vecvec_hdf5", "[utils]")
 {
 	HDF5VTUWriter writer;
 	run_test_vecvec_hdf5(writer, "test_vecvec.vtu");
 }
+#endif
