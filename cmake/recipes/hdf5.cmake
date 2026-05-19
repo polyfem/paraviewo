@@ -5,6 +5,19 @@ if(TARGET hdf5::hdf5)
     return()
 endif()
 
+# 1. Try finding a system-installed HDF5 first
+find_package(HDF5 COMPONENTS C HL QUIET)
+
+if(HDF5_FOUND)
+    message(STATUS "Found system HDF5, skipping CPM download.")
+    # Map the system target to the target expected by paraviewo
+    if(NOT TARGET hdf5::hdf5)
+        add_library(hdf5::hdf5 ALIAS hdf5::hdf5_cpp) # or hdf5::hdf5 depending on CMake version
+    endif()
+    return()
+endif()
+
+# 2. Fallback to CPM build
 message(STATUS "Third-party: creating target 'hdf5'")
 
 option(HDF5_GENERATE_HEADERS "" OFF)
