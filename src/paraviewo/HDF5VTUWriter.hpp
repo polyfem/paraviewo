@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef PARAVIEWO_WITH_HDF5
+#error "HDF5VTUWriter.hpp included but PARAVIEWO_WITH_HDF5 is not enabled in CMake!"
+#endif
+
 #include "ParaviewWriter.hpp"
 
 #include <h5pp/h5pp.h>
@@ -12,7 +16,6 @@
 #include <vector>
 #include <array>
 #include <cassert>
-
 
 namespace paraviewo
 {
@@ -66,7 +69,7 @@ namespace paraviewo
 	class HDF5VTUWriter : public ParaviewWriter
 	{
 	public:
-	    using ParaviewWriter::write_mesh;
+		using ParaviewWriter::write_mesh;
 
 		HDF5VTUWriter(bool binary = true);
 
