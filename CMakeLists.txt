@@ -19,19 +19,19 @@ endif()
 
 # Include user-provided default options if available. We do that before the main
 # `project()` so that we can define the C/C++ compilers from the option file.
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ParaviwoOptions.cmake)
-    message(STATUS "Using local options file: ${CMAKE_CURRENT_SOURCE_DIR}/ParaviwoOptions.cmake")
-    include(${CMAKE_CURRENT_SOURCE_DIR}/ParaviwoOptions.cmake)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ParaviewoOptions.cmake)
+    message(STATUS "Using local options file: ${CMAKE_CURRENT_SOURCE_DIR}/ParaviewoOptions.cmake")
+    include(${CMAKE_CURRENT_SOURCE_DIR}/ParaviewoOptions.cmake)
 endif()
 
 # Enable ccache if available
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
-  option(PARAVIWO_WITH_CCACHE "Enable ccache when building ParaviewO" ${PARAVIEWO_TOPLEVEL_PROJECT})
+  option(PARAVIEWO_WITH_CCACHE "Enable ccache when building ParaviewO" ${PARAVIEWO_TOPLEVEL_PROJECT})
 else()
-  option(PARAVIWO_WITH_CCACHE "Enable ccache when building ParaviewO" OFF)
+  option(PARAVIEWO_WITH_CCACHE "Enable ccache when building ParaviewO" OFF)
 endif()
-if(PARAVIWO_WITH_CCACHE AND CCACHE_PROGRAM)
+if(PARAVIEWO_WITH_CCACHE AND CCACHE_PROGRAM)
   message(STATUS "Enabling Ccache support")
   set(ccacheEnv
     CCACHE_BASEDIR=${CMAKE_BINARY_DIR}
