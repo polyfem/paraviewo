@@ -7,7 +7,7 @@ endif()
 
 message(STATUS "Third-party: creating target 'ZLIB::ZLIBSTATIC'")
 
-set(ZLIB_BUILD_TESTINGS OFF)
+set(ZLIB_BUILD_TESTING OFF)
 
 include(CPM)
 CPMAddPackage("gh:madler/zlib@1.3.2")
