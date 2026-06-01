@@ -37,6 +37,12 @@ option(HDF5_TEST_TOOLS "" OFF)
 option(HDF5_TEST_VFD "" OFF)
 option(HDF5_ENABLE_ALL_WARNINGS "" OFF)
 option(HDF5_ENABLE_EMBEDDED_LIBINFO "" OFF)
+
+# Tell hdf5 to use our zlib. See config/HDF5UseZLIB.cmake in hdf5 for exact logic.
+include(zlib_static)
+set(H5_ZLIB_HEADER "zlib.h")
+set(ZLIB_FOUND TRUE)
+
 #To prevent changes in the oput dirs
 set (HDF5_EXTERNALLY_CONFIGURED 1)
 
@@ -46,5 +52,6 @@ set(HDF5_RELEASE_TAG hdf5-1_14_3)
 #we fetch the zip file to get prebuilt files (and avoid a perl dependency)
 CPMAddPackage("https://github.com/HDFGroup/hdf5/releases/download/${HDF5_RELEASE_TAG}/${HDF5_RELEASE_TAG}.zip")
 
+target_link_libraries(hdf5-static PUBLIC ZLIB::ZLIBSTATIC)
 target_link_libraries(hdf5-static INTERFACE hdf5_hl-static)
 add_library(hdf5::hdf5 ALIAS hdf5-static)
