@@ -1,5 +1,7 @@
 #include "base64Layer.hpp"
 
+#include <algorithm>
+
 namespace paraviewo
 {
 	namespace
@@ -60,9 +62,24 @@ namespace paraviewo
 
 		while (n >= 3)
 		{
-			append_group(reinterpret_cast<const unsigned char *>(s), 3);
-			s += 3;
-			n -= 3;
+			const auto groups = std::min<std::streamsize>(n / 3, (output_buffer_.size() - output_size_) / 4);
+			const auto *input = reinterpret_cast<const unsigned char *>(s);
+			auto *output = output_buffer_.data() + output_size_;
+			for (std::streamsize group = 0; group < groups; ++group)
+			{
+				const unsigned char a = input[0], b = input[1], c = input[2];
+				output[0] = base64Chars[a >> 2];
+				output[1] = base64Chars[((a & 3) << 4) | (b >> 4)];
+				output[2] = base64Chars[((b & 15) << 2) | (c >> 6)];
+				output[3] = base64Chars[c & 63];
+				input += 3;
+				output += 4;
+			}
+			s += groups * 3;
+			n -= groups * 3;
+			output_size_ += groups * 4;
+			if (output_size_ == output_buffer_.size())
+				flush();
 		}
 		while (n-- > 0)
 			group_[groupLen_++] = static_cast<unsigned char>(*s++);
