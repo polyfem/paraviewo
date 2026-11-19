@@ -1,77 +1,38 @@
 #include "base64Layer.hpp"
 
+#include <algorithm>
+
 namespace paraviewo
 {
 	namespace
 	{
-		//! \cond fileScope
-		//- The characters used for base-64
-		static const unsigned char base64Chars[64] =
-			{
-				'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-				'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-				'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-				'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-				'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-				'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-				'w', 'x', 'y', 'z', '0', '1', '2', '3',
-				'4', '5', '6', '7', '8', '9', '+', '/'};
-		//! \endcond
-	} // namespace
-
-	std::size_t base64Layer::encodedLength(std::size_t n)
-	{
-		return 4 * ((n / 3) + (n % 3 ? 1 : 0));
+		constexpr char base64Chars[] =
+			"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 	}
 
-	inline unsigned char base64Layer::encode0() const
+	void base64Layer::flush()
 	{
-		// Top 6 bits of char0
-		return base64Chars[((group_[0] & 0xFC) >> 2)];
+		if (output_size_ == 0)
+			return;
+		os_.write(output_buffer_.data(), static_cast<std::streamsize>(output_size_));
+		output_size_ = 0;
 	}
 
-	inline unsigned char base64Layer::encode1() const
+	void base64Layer::append_group(const unsigned char *data, const std::size_t size)
 	{
-		// Bottom 2 bits of char0, Top 4 bits of char1
-		return base64Chars[((group_[0] & 0x03) << 4) | ((group_[1] & 0xF0) >> 4)];
-	}
-
-	inline unsigned char base64Layer::encode2() const
-	{
-		// Bottom 4 bits of char1, Top 2 bits of char2
-		return base64Chars[((group_[1] & 0x0F) << 2) | ((group_[2] & 0xC0) >> 6)];
-	}
-
-	inline unsigned char base64Layer::encode3() const
-	{
-		// Bottom 6 bits of char2
-		return base64Chars[(group_[2] & 0x3F)];
-	}
-
-	void base64Layer::add(char c)
-	{
-		group_[groupLen_++] = static_cast<unsigned char>(c);
-		if (groupLen_ == 3)
-		{
-			unsigned char out[4];
-
-			out[0] = encode0();
-			out[1] = encode1();
-			out[2] = encode2();
-			out[3] = encode3();
-			os_.write(reinterpret_cast<char *>(out), 4);
-
-			groupLen_ = 0;
-		}
-
-		dirty_ = true;
+		const unsigned char a = data[0];
+		const unsigned char b = size > 1 ? data[1] : 0;
+		const unsigned char c = size > 2 ? data[2] : 0;
+		output_buffer_[output_size_++] = base64Chars[a >> 2];
+		output_buffer_[output_size_++] = base64Chars[((a & 3) << 4) | (b >> 4)];
+		output_buffer_[output_size_++] = size > 1 ? base64Chars[((b & 15) << 2) | (c >> 6)] : '=';
+		output_buffer_[output_size_++] = size > 2 ? base64Chars[c & 63] : '=';
+		if (output_size_ == output_buffer_.size())
+			flush();
 	}
 
 	base64Layer::base64Layer(std::ostream &os)
-		: os_(os),
-		  group_(),
-		  groupLen_(0),
-		  dirty_(false)
+		: os_(os), group_(), groupLen_(0), dirty_(false)
 	{
 	}
 
@@ -82,14 +43,52 @@ namespace paraviewo
 
 	void base64Layer::write(const char *s, std::streamsize n)
 	{
-		for (std::streamsize i = 0; i < n; ++i)
+		if (n <= 0)
+			return;
+		dirty_ = true;
+
+		if (groupLen_ > 0)
 		{
-			add(s[i]);
+			while (groupLen_ < 3 && n > 0)
+			{
+				group_[groupLen_++] = static_cast<unsigned char>(*s++);
+				--n;
+			}
+			if (groupLen_ < 3)
+				return;
+			append_group(group_, 3);
+			groupLen_ = 0;
 		}
+
+		while (n >= 3)
+		{
+			const auto groups = std::min<std::streamsize>(n / 3, (output_buffer_.size() - output_size_) / 4);
+			const auto *input = reinterpret_cast<const unsigned char *>(s);
+			auto *output = output_buffer_.data() + output_size_;
+			for (std::streamsize group = 0; group < groups; ++group)
+			{
+				const unsigned char a = input[0], b = input[1], c = input[2];
+				output[0] = base64Chars[a >> 2];
+				output[1] = base64Chars[((a & 3) << 4) | (b >> 4)];
+				output[2] = base64Chars[((b & 15) << 2) | (c >> 6)];
+				output[3] = base64Chars[c & 63];
+				input += 3;
+				output += 4;
+			}
+			s += groups * 3;
+			n -= groups * 3;
+			output_size_ += groups * 4;
+			if (output_size_ == output_buffer_.size())
+				flush();
+		}
+		while (n-- > 0)
+			group_[groupLen_++] = static_cast<unsigned char>(*s++);
 	}
 
 	void base64Layer::reset()
 	{
+		// Completed groups precede the new sequence. Discard its partial group.
+		flush();
 		groupLen_ = 0;
 		dirty_ = false;
 	}
@@ -97,38 +96,12 @@ namespace paraviewo
 	bool base64Layer::close()
 	{
 		if (!dirty_)
-		{
 			return false;
-		}
-
-		unsigned char out[4];
-		if (groupLen_ == 1)
-		{
-			group_[1] = 0;
-
-			out[0] = encode0();
-			out[1] = encode1();
-			out[2] = '=';
-			out[3] = '=';
-			os_.write(reinterpret_cast<char *>(out), 4);
-		}
-		else if (groupLen_ == 2)
-		{
-			group_[2] = 0;
-
-			out[0] = encode0();
-			out[1] = encode1();
-			out[2] = encode2();
-			out[3] = '=';
-			os_.write(reinterpret_cast<char *>(out), 4);
-		}
-
-		// group-length == 0 (no content)
-		// group-length == 3 is not possible, already reset in add()
-
+		if (groupLen_ > 0)
+			append_group(group_, groupLen_);
 		groupLen_ = 0;
 		dirty_ = false;
-
+		flush();
 		return true;
 	}
 } // namespace paraviewo
