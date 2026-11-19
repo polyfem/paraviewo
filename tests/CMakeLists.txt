@@ -4,7 +4,7 @@
 
 set(test_sources
 	test.cpp
-	test_base64.cpp
+	test_vtu.cpp
 )
 
 add_executable(paraviewo_unit_tests ${test_sources})

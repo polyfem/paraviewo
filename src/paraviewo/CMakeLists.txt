@@ -6,8 +6,6 @@ set(SOURCES
 	VTUWriter.hpp
 	PVDWriter.cpp
 	PVDWriter.hpp
-	base64Layer.hpp
-	base64Layer.cpp
 )
 
 if(PARAVIEWO_WITH_HDF5)

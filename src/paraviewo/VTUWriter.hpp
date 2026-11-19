@@ -2,13 +2,12 @@
 
 #include "ParaviewWriter.hpp"
 
-#include "base64Layer.hpp"
-
 #include <Eigen/Dense>
 
+#include <cstdint>
 #include <fstream>
-#include <string>
 #include <iostream>
+#include <string>
 #include <vector>
 
 namespace paraviewo
@@ -24,12 +23,10 @@ namespace paraviewo
 		{
 		}
 
-		VTKDataNode(const std::string &name, const double binary, const std::string &numeric_type, const Eigen::MatrixXd &data = Eigen::MatrixXd(), const int n_components = 1)
+		VTKDataNode(const std::string &name, const bool binary, const std::string &numeric_type, const Eigen::MatrixXd &data = Eigen::MatrixXd(), const int n_components = 1)
 			: name_(name), binary_(binary), numeric_type_(numeric_type), data_(binary_ ? data.transpose() : data), n_components_(n_components)
 		{
 		}
-
-		// const inline Eigen::MatrixXd &data() { return data_; }
 
 		void initialize(const std::string &name, const std::string &numeric_type, const Eigen::MatrixXd &data, const int n_components = 1)
 		{
@@ -39,35 +36,35 @@ namespace paraviewo
 			n_components_ = n_components;
 		}
 
-		void write(std::ostream &os) const
+		void write(std::ostream &os, uint64_t &offset) const
 		{
-
 			if (binary_)
 			{
-				base64Layer base64(os);
-
-				os << "<DataArray type=\"" << numeric_type_ << "\" Name=\"" << name_ << "\" NumberOfComponents=\"" << n_components_ << "\" format=\"binary\">\n";
-				const uint64_t size = data_.size() * sizeof(T);
-				base64.write(size);
-
-				base64.write(data_.data(), data_.size());
-				base64.close();
-				os << "\n";
+				os << "<DataArray type=\"" << numeric_type_ << "\" Name=\"" << name_ << "\" NumberOfComponents=\"" << n_components_ << "\" format=\"appended\" offset=\"" << offset << "\"/>\n";
+				offset += appended_block_size();
 			}
 			else
 			{
 				os << "<DataArray type=\"" << numeric_type_ << "\" Name=\"" << name_ << "\" NumberOfComponents=\"" << n_components_ << "\" format=\"ascii\">\n";
 				os << data_;
+				os << "</DataArray>\n";
 			}
-			os << "</DataArray>\n";
+		}
+
+		void write_appended(std::ostream &os) const
+		{
+			const uint64_t size = payload_size();
+			os.write(reinterpret_cast<const char *>(&size), sizeof(size));
+			os.write(reinterpret_cast<const char *>(data_.data()), static_cast<std::streamsize>(size));
 		}
 
 		inline bool empty() const { return data_.size() <= 0; }
+		inline uint64_t payload_size() const { return static_cast<uint64_t>(data_.size()) * sizeof(T); }
+		inline uint64_t appended_block_size() const { return sizeof(uint64_t) + payload_size(); }
 
 	private:
 		std::string name_;
 		bool binary_;
-		/// Float32/
 		std::string numeric_type_;
 		Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> data_;
 		int n_components_;
@@ -76,7 +73,7 @@ namespace paraviewo
 	class VTUWriter : public ParaviewWriter
 	{
 	public:
-	    using ParaviewWriter::write_mesh;
+		using ParaviewWriter::write_mesh;
 
 		VTUWriter(bool binary = true);
 
@@ -103,12 +100,20 @@ namespace paraviewo
 		std::string current_scalar_cell_data_;
 		std::string current_vector_cell_data_;
 
-		void write_point_data(std::ostream &os);
-		void write_cell_data(std::ostream &os);
+		void write_point_data(std::ostream &os, uint64_t &offset);
+		void write_point_data_appended(std::ostream &os) const;
+		void write_cell_data(std::ostream &os, uint64_t &offset);
+		void write_cell_data_appended(std::ostream &os) const;
 		void write_header(const int n_vertices, const int n_elements, std::ostream &os);
 		void write_footer(std::ostream &os);
-		void write_points(const Eigen::MatrixXd &points, std::ostream &os);
-		void write_cells(const Eigen::MatrixXi &cells, const CellType ctype, std::ostream &os);
-		void write_cells(const std::vector<CellElement> &cells, std::ostream &os);
+		void write_appended_data_header(std::ostream &os);
+		void write_appended_data_footer(std::ostream &os);
+		void write_file_footer(std::ostream &os);
+		void write_points(const Eigen::MatrixXd &points, std::ostream &os, uint64_t &offset);
+		void write_points_appended(const Eigen::MatrixXd &points, std::ostream &os) const;
+		void write_cells(const Eigen::MatrixXi &cells, const CellType ctype, std::ostream &os, uint64_t &offset);
+		void write_cells_appended(const Eigen::MatrixXi &cells, const CellType ctype, std::ostream &os) const;
+		void write_cells(const std::vector<CellElement> &cells, std::ostream &os, uint64_t &offset);
+		void write_cells_appended(const std::vector<CellElement> &cells, std::ostream &os) const;
 	};
 } // namespace paraviewo
