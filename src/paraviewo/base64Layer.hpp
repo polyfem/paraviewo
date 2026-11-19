@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <cstdint>
+#include <array>
 
 namespace paraviewo
 {
@@ -20,19 +21,14 @@ namespace paraviewo
 		//- Track if anything has been encoded.
 		bool dirty_;
 
-		inline unsigned char encode0() const;
-		inline unsigned char encode1() const;
-		inline unsigned char encode2() const;
-		inline unsigned char encode3() const;
+		std::array<char, 64 * 1024> output_buffer_;
+		std::size_t output_size_ = 0;
 
 		base64Layer(const base64Layer &) = delete;
 		void operator=(const base64Layer &) = delete;
 
-		//- Add a character to the group, outputting when the group is full.
-		void add(char c);
-
-		//- The encoded length has 4 bytes out for every 3 bytes in.
-		static std::size_t encodedLength(std::size_t n);
+		void append_group(const unsigned char *data, std::size_t size);
+		void flush();
 
 	public:
 		base64Layer(std::ostream &os);
@@ -57,4 +53,4 @@ namespace paraviewo
 		//  Return false if no encoding was actually performed.
 		bool close();
 	};
-}
+} // namespace paraviewo
