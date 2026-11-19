@@ -32,11 +32,11 @@ namespace paraviewo
 		void write_uniform_offsets(std::ostream &os, const int n_cells, const int n_cell_vertices)
 		{
 			Eigen::Matrix<OffsetT, Eigen::Dynamic, 1> offsets(n_cells);
-			OffsetT acc = static_cast<OffsetT>(n_cell_vertices);
+			Eigen::Index acc = n_cell_vertices;
 			for (int i = 0; i < n_cells; ++i)
 			{
-				offsets(i) = acc;
-				acc += static_cast<OffsetT>(n_cell_vertices);
+				offsets(i) = static_cast<OffsetT>(acc);
+				acc += n_cell_vertices;
 			}
 
 			write_appended_block(os, offsets.data(), static_cast<uint64_t>(offsets.size()));
@@ -372,7 +372,7 @@ namespace paraviewo
 		const bool use_32_bit_offsets = n_connectivity_ids <= static_cast<uint64_t>(std::numeric_limits<int32_t>::max());
 
 		Eigen::Matrix<int32_t, Eigen::Dynamic, 1> connectivity(n_connectivity_ids);
-		int index = 0;
+		Eigen::Index index = 0;
 		for (const auto &cell : cells)
 		{
 			for (const int vertex : cell.vertices)
